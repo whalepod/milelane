@@ -1,0 +1,6 @@
+[MySQL]
+
+Host     = "127.0.0.1"
+Username = "root"
+Database = "circle_test"
+Password = ""

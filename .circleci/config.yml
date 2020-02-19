@@ -1,0 +1,35 @@
+# Golang CircleCI 2.1 configuration file
+#
+# Check https://circleci.com/docs/2.1/language-go/ for more details
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.13.1
+        environment:
+          GO111MODULE: "on"
+          MILELANE_PATH: /go/src/github.com/whalepod/milelane/
+          MILELANE_ENV: test
+      - image: circleci/mysql:5.7.26
+        environment: # environment variables for primary container
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: circle_test
+          MYSQL_USER: root
+    working_directory: /go/src/github.com/whalepod/milelane
+    steps:
+      - run:
+          name: "Wait for DB."
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
+      - checkout
+      - run:
+          name: Install MySQL CLI
+          command: |
+            sudo apt update
+            sudo apt-get install default-mysql-client
+            mysql -h 127.0.0.1 -u root circle_test < db/schema.sql
+            mysql -h 127.0.0.1 -u root circle_test < db/seed/seed.sql
+      - run:
+          name: "Execute test and get coverage report."
+          command: |
+            go test ./...

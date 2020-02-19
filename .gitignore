@@ -1,0 +1,9 @@
+cover.out
+cover.html
+
+config/development.toml
+config/production.toml
+
+.envrc
+
+main
