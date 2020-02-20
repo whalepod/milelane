@@ -112,7 +112,7 @@ func TestUpdateCompletedAt(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateCompletedAt)).
-		WithArgs(now, AnyTime{}).
+		WithArgs(now, AnyTime{}, 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
