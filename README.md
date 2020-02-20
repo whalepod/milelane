@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/takuoki/clmconv/branch/master/graph/badge.svg)](https://codecov.io/gh/takuoki/clmconv)
+[![codecov](https://codecov.io/gh/whalepod/milelane/branch/master/graph/badge.svg)](https://codecov.io/gh/whalepod/milelane)
 
 # milelane
 
