@@ -1,0 +1,7 @@
+ignore:
+  - "main.go"
+coverage:
+  notify:
+    slack:
+      default:
+        url: secret:PKuYAPN4qQ8YkRB/QIcdypUGoXBuFd2MLcIOTeawE3mNBF5+C9pKI1LATG+tuBqH9qMWhV0999c+HqDwnvcq92+O/62u6Bu2PR/2hlxaUYekrsdWYaJ47TOF0iqqV1aY0J2N0msPfDrbQpSMx7Q/9Vn/+jBHSxZvo+P0fC3Cp8s=
