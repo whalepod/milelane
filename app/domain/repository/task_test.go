@@ -110,9 +110,11 @@ func TestUpdateCompletedAt(t *testing.T) {
 			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
 				AddRow("1", "テストタスク", nil, now, now))
 
+	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateCompletedAt)).
 		WithArgs(now, AnyTime{}).
 		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	taskRepository := NewTask(db)
 
