@@ -2,6 +2,8 @@
 #
 # Check https://circleci.com/docs/2.1/language-go/ for more details
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
 jobs:
   build:
     docker:
@@ -30,7 +32,16 @@ jobs:
             mysql -h 127.0.0.1 -u root circle_test < db/schema.sql
             mysql -h 127.0.0.1 -u root circle_test < db/seed/seed.sql
       - run:
-          name: "Execute test."
+          name: "Create a tmp directory for artifacts which is used for codecov."
+          command: |
+            mkdir -p /tmp/artifacts
+      - run:
+          name: "Execute test and get coverage report."
           command: |
             go clean -cache
-            go test ./...
+            go test -cover -coverprofile=cover.out ./...
+            mv cover.out /tmp/artifacts
+      - store_artifacts:
+          path: /tmp/artifacts
+      - codecov/upload:
+          file: /tmp/artifacts/cover.out
