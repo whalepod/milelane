@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	QueryTaskTreeSelect = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelect               = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
 	QueryTaskSelectSelfAndDescendants = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE descendant_relations.ancestor_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.path_length ORDER BY descendant_relations.path_length asc`
-	QueryTaskSelectSelfAndAncestors = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS ancestor_relations ON tasks.id = ancestor_relations.ancestor_id WHERE ancestor_relations.descendant_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, ancestor_relations.path_length ORDER BY ancestor_relations.path_length asc`
-	QueryTaskSelectPathLength = `SELECT max(path_length) AS path_length FROM task_relations WHERE descendant_id = ?`
-	QueryTaskRelationDeleteAncestors = `DELETE FROM task_relations WHERE descendant_id IN (?,?,?) AND ancestor_id NOT IN (?,?,?)`
-	QueryTaskSelectID2 = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 2)`
-	QueryTaskSelectID3 = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 3)`
-	QueryTaskRelationInsertRegex = `INSERT INTO task_relations`
+	QueryTaskSelectSelfAndAncestors   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS ancestor_relations ON tasks.id = ancestor_relations.ancestor_id WHERE ancestor_relations.descendant_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, ancestor_relations.path_length ORDER BY ancestor_relations.path_length asc`
+	QueryTaskSelectPathLength         = `SELECT max(path_length) AS path_length FROM task_relations WHERE descendant_id = ?`
+	QueryTaskRelationDeleteAncestors  = `DELETE FROM task_relations WHERE descendant_id IN (?,?,?) AND ancestor_id NOT IN (?,?,?)`
+	QueryTaskSelectID2                = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 2)`
+	QueryTaskSelectID3                = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 3)`
+	QueryTaskRelationInsertRegex      = `INSERT INTO task_relations`
 )
 
 func TestTaskTree(t *testing.T) {

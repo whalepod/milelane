@@ -78,6 +78,69 @@ func (*TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {
 	return &tasks, nil
 }
 
+func (*TaskAccessorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
+	task := repository.TreeableTask{
+		Task: repository.Task{
+			ID:          1,
+			Title:       "trunk",
+			Type:        uint(TypeLane),
+			CompletedAt: &now,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		Depth: 1,
+		Children: []repository.TreeableTask{
+			{
+				Task: repository.Task{
+					ID:          2,
+					Title:       "branch",
+					Type:        uint(TypeTask),
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 2,
+				Children: []repository.TreeableTask{
+					{
+						Task: repository.Task{
+							ID:          3,
+							Title:       "leaf",
+							Type:        uint(TypeTask),
+							CompletedAt: &now,
+							CreatedAt:   now,
+							UpdatedAt:   now,
+						},
+						Depth: 3,
+					},
+					{
+						Task: repository.Task{
+							ID:          5,
+							Title:       "leaf-2",
+							Type:        uint(TypeTask),
+							CompletedAt: &now,
+							CreatedAt:   now,
+							UpdatedAt:   now,
+						},
+						Depth: 3,
+					},
+				},
+			},
+			{
+				Task: repository.Task{
+					ID:          4,
+					Title:       "branch-2",
+					Type:        uint(TypeTask),
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 2,
+			},
+		},
+	}
+	return &task, nil
+}
+
 func (*TaskAccessorMock) Create(title string) (*repository.Task, error) {
 	var task repository.Task
 	return &task, nil
@@ -102,6 +165,10 @@ func (*TaskAccessorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, chil
 type TaskAccessorErrorMock struct{}
 
 func (*TaskAccessorErrorMock) ListTree() (*[]repository.TreeableTask, error) {
+	return nil, xerrors.New("Error mock called.")
+}
+
+func (*TaskAccessorErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
 	return nil, xerrors.New("Error mock called.")
 }
 
@@ -190,6 +257,69 @@ func (*TaskAccessorMoveToChildErrorMock) ListTree() (*[]repository.TreeableTask,
 		},
 	}
 	return &tasks, nil
+}
+
+func (*TaskAccessorMoveToChildErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
+	task := repository.TreeableTask{
+		Task: repository.Task{
+			ID:          1,
+			Title:       "trunk",
+			Type:        uint(TypeLane),
+			CompletedAt: &now,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		Depth: 1,
+		Children: []repository.TreeableTask{
+			{
+				Task: repository.Task{
+					ID:          2,
+					Title:       "branch",
+					Type:        uint(TypeTask),
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 2,
+				Children: []repository.TreeableTask{
+					{
+						Task: repository.Task{
+							ID:          3,
+							Title:       "leaf",
+							Type:        uint(TypeTask),
+							CompletedAt: &now,
+							CreatedAt:   now,
+							UpdatedAt:   now,
+						},
+						Depth: 3,
+					},
+					{
+						Task: repository.Task{
+							ID:          5,
+							Title:       "leaf-2",
+							Type:        uint(TypeTask),
+							CompletedAt: &now,
+							CreatedAt:   now,
+							UpdatedAt:   now,
+						},
+						Depth: 3,
+					},
+				},
+			},
+			{
+				Task: repository.Task{
+					ID:          4,
+					Title:       "branch-2",
+					Type:        uint(TypeTask),
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 2,
+			},
+		},
+	}
+	return &task, nil
 }
 
 func (*TaskAccessorMoveToChildErrorMock) Create(title string) (*repository.Task, error) {
@@ -364,33 +494,33 @@ func TestCompleteError(t *testing.T) {
 }
 
 func TestLanize(t *testing.T) {
-  var taskAccessor TaskAccessorMock
-  task, err := NewTask(&taskAccessor)
-  if err != nil {
-    t.Fatalf("Returned err response: %s", err.Error())
-  }
+	var taskAccessor TaskAccessorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
 
-  err = task.Lanize(1)
-  if err != nil {
-    t.Fatalf("Returned err response: %s", err.Error())
-  }
+	err = task.Lanize(1)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
 
-  t.Log("Success.")
+	t.Log("Success.")
 }
 
 func TestLanizeError(t *testing.T) {
-  var taskAccessor TaskAccessorErrorMock
-  task, err := NewTask(&taskAccessor)
-  if err != nil {
-    t.Fatalf("Returned err response: %s", err.Error())
-  }
+	var taskAccessor TaskAccessorErrorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
 
-  err = task.Lanize(1)
-  if err.Error() != "Error mock called." {
-    t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
-  }
+	err = task.Lanize(1)
+	if err.Error() != "Error mock called." {
+		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	}
 
-  t.Log("Success: Got expected err.")
+	t.Log("Success: Got expected err.")
 }
 
 func TestMoveToRoot(t *testing.T) {
