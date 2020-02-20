@@ -30,6 +30,6 @@ jobs:
             mysql -h 127.0.0.1 -u root circle_test < db/schema.sql
             mysql -h 127.0.0.1 -u root circle_test < db/seed/seed.sql
       - run:
-          name: "Execute test and get coverage report."
+          name: "Execute test."
           command: |
             go test ./...
