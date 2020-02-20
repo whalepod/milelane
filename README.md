@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/takuoki/clmconv/branch/master/graph/badge.svg)](https://codecov.io/gh/takuoki/clmconv)
+
 # milelane
 
 ## How to test
