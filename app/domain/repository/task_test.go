@@ -152,9 +152,11 @@ func TestUpdateType(t *testing.T) {
 			sqlmock.NewRows([]string{"id", "title", "type", "completed_at", "created_at", "updated_at"}).
 				AddRow("1", "テストタスク", 0, nil, now, now))
 
+	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateType)).
 		WithArgs(10, AnyTime{}, 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	taskRepository := NewTask(db)
 
@@ -194,8 +196,10 @@ func TestUpdateTypeUpdateCallsError(t *testing.T) {
 			sqlmock.NewRows([]string{"id", "title", "type", "completed_at", "created_at", "updated_at"}).
 				AddRow("1", "テストタスク", 0, nil, now, now))
 
+	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateType)).
 		WillReturnError(fmt.Errorf("Updating task failed."))
+	mock.ExpectCommit()
 
 	taskRepository := NewTask(db)
 
