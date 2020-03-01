@@ -9,8 +9,6 @@ import (
 	"github.com/whalepod/milelane/app/domain/repository"
 )
 
-var now = time.Now()
-
 type TaskAccessorMock struct{}
 
 func (*TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {

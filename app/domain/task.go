@@ -147,7 +147,7 @@ func (t *Task) Lanize(id uint) error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
 func (t *Task) MoveToRoot(taskID uint) error {
