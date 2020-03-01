@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS `devices` (
+  `id` VARCHAR(36) NOT NULL PRIMARY KEY,
+  `device_id` VARCHAR(255) NOT NULL,
+  `type` INT UNSIGNED NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `devices` ADD INDEX `idx_device_device_id`(`device_id`);
+
 CREATE TABLE IF NOT EXISTS `tasks` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
