@@ -11,6 +11,10 @@ func Router() *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORSHeaders())
 
+	r.POST("/device/create", func(c *gin.Context) {
+		handler.DeviceCreate(c)
+	})
+
 	r.GET("/tasks", func(c *gin.Context) {
 		handler.TaskIndex(c)
 	})
