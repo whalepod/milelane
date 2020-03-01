@@ -1,3 +1,6 @@
+-- device
+INSERT INTO `devices` (`id`, `device_id`, `type`, `created_at`, `updated_at`) VALUE ('60982a48-9328-441f-805b-d3ab0cad9e1f', 'dc625158-a9e9-4b7c-b15a-89991b013147', 0, NOW(), NOW());
+
 -- task uncompleted.
 INSERT INTO `tasks` (`title`, `type`, `created_at`, `updated_at`) VALUES ('テスト', 0, NOW(), NOW());
 INSERT INTO `task_relations` (`ancestor_id`, `descendant_id`, `path_length`, `created_at`, `updated_at`) VALUES (1, 1, 1, NOW(), NOW());
