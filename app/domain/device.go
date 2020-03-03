@@ -2,21 +2,26 @@ package domain
 
 import "github.com/whalepod/milelane/app/domain/repository"
 
+// DeviceType contains application platform.
 type DeviceType uint
 
 const (
+	// TypeDesktop is desktop application like electron.
 	TypeDesktop DeviceType = iota * 10
-	TypeSmartphone
-	TypeTablet
+	// TypeIOS is iOS application.
 	TypeIOS
+	// TypeAndroid is Android application.
 	TypeAndroid
+	// TypeBrowser is distributed on web browsers.
+	TypeBrowser
 )
 
+// DeviceAccessor gives access to persistence layer.
 type DeviceAccessor interface {
 	Create(deviceID string, deviceType uint) (*repository.Device, error)
 }
 
-// Struct for domain, not for gorm.
+// Device is struct for domain, not for gorm.
 type Device struct {
 	deviceAccessor DeviceAccessor
 	ID             string `json:"id"`
@@ -26,6 +31,7 @@ type Device struct {
 	UpdatedAt      string `json:"updated_at"`
 }
 
+// NewDevice returns Device struct with DeviceAccessor.
 func NewDevice(da DeviceAccessor) (*Device, error) {
 	var d Device
 	d.deviceAccessor = da
@@ -33,6 +39,7 @@ func NewDevice(da DeviceAccessor) (*Device, error) {
 	return &d, nil
 }
 
+// Create saves device record through persistence layer.
 func (d *Device) Create(deviceID string, deviceType string) (*Device, error) {
 	repositoryDevice, err := d.deviceAccessor.Create(deviceID, uint(GetDeviceType(deviceType)))
 	if err != nil {
@@ -50,36 +57,33 @@ func (d *Device) Create(deviceID string, deviceType string) (*Device, error) {
 	return &device, nil
 }
 
-// DeviceType is compliant with Stringer interface.
+// String makes DeviceType compliant with Stringer interface.
 func (d DeviceType) String() string {
 	switch d {
 	case TypeDesktop:
 		return "desktop"
-	case TypeSmartphone:
-		return "smartphone"
-	case TypeTablet:
-		return "tablet"
 	case TypeIOS:
 		return "ios"
 	case TypeAndroid:
 		return "android"
+	case TypeBrowser:
+		return "browser"
 	default:
 		return "undefined"
 	}
 }
 
+// GetDeviceType returns DeviceType by string.
 func GetDeviceType(deviceStr string) DeviceType {
 	switch deviceStr {
 	case "desktop":
 		return DeviceType(TypeDesktop)
-	case "smartphone":
-		return DeviceType(TypeSmartphone)
-	case "tablet":
-		return DeviceType(TypeTablet)
 	case "ios":
 		return DeviceType(TypeIOS)
 	case "android":
 		return DeviceType(TypeAndroid)
+	case "browser":
+		return DeviceType(TypeBrowser)
 	default:
 		return DeviceType(TypeDesktop)
 	}
