@@ -27,10 +27,9 @@ func (*DeviceAccessorErrorMock) Create(deviceID string, deviceType uint) (*repos
 
 var deviceTypeStrs = []string{
 	"desktop",
-	"smartphone",
-	"tablet",
 	"ios",
 	"android",
+	"browser",
 	"other",
 }
 
@@ -75,10 +74,9 @@ var deviceTypes = []struct {
 	out string
 }{
 	{TypeDesktop, "desktop"},
-	{TypeSmartphone, "smartphone"},
-	{TypeTablet, "tablet"},
 	{TypeIOS, "ios"},
 	{TypeAndroid, "android"},
+	{TypeBrowser, "browser"},
 	{999, "undefined"},
 }
 
@@ -86,7 +84,7 @@ func TestDeviceTypeString(t *testing.T) {
 	for _, d := range deviceTypes {
 		deviceType := d.in
 		if deviceType.String() != d.out {
-			t.Fatalf("DeviceType conversion to string failed, got response: %s", deviceType.String())
+			t.Fatalf("DeviceType conversion to string failed, expected: %s, got response: %s", d.out, deviceType.String())
 		}
 	}
 
