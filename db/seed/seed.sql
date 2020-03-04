@@ -26,3 +26,11 @@ INSERT INTO `task_relations` (`ancestor_id`, `descendant_id`, `path_length`, `cr
 INSERT INTO `tasks` (`title`, `type`, `created_at`, `updated_at`) VALUES ('branch-2', 0, NOW(), NOW());
 INSERT INTO `task_relations` (`ancestor_id`, `descendant_id`, `path_length`, `created_at`, `updated_at`) VALUES (6, 6, 1, NOW(), NOW());
 INSERT INTO `task_relations` (`ancestor_id`, `descendant_id`, `path_length`, `created_at`, `updated_at`) VALUES (3, 6, 2, NOW(), NOW());
+
+-- connect tasks with device.
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 1, NOW(), NOW());
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 2, NOW(), NOW());
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 3, NOW(), NOW());
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 4, NOW(), NOW());
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 5, NOW(), NOW());
+INSERT INTO `device_tasks` (`device_id`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 6, NOW(), NOW());
