@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS `milelane` DEFAULT CHARACTER SET = 'utf8mb4';
+
+USE `milelane`;
