@@ -3,4 +3,24 @@
 # milelane
 
 ## How to test
+
 - `go test -coverprofile=cover.out ./... && go tool cover -html=cover.out -o cover.html`
+
+## Setup with docker-compose
+
+- Install Docker
+- Update /etc/hosts, add setting below.
+```
+127.0.0.1 docker-local.milelane.co
+```
+
+- Run
+```
+docker-compose up -d
+```
+
+- Access
+```
+http://docker-local.milelane.co/tasks
+# => Right after init, it returns null.
+```
