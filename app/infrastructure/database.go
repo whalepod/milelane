@@ -4,20 +4,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/jinzhu/gorm"
+	// To enable gorm to connect MySQL.
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
+// DB exposes database connection.
 var DB *gorm.DB
 
-const maxSleepTime = 30
+const maxSleepTime = 10
 
-type Config struct {
-	MySQL MySQLConfig
-}
-
-type MySQLConfig struct {
+type mySQLConfig struct {
 	Username string
 	Password string
 	Host     string
@@ -25,34 +22,23 @@ type MySQLConfig struct {
 }
 
 func init() {
-	// Start db connection.
-	var config Config
+	DB = connectDB()
+}
 
-	var configFilePath string
-	basePath := os.Getenv("MILELANE_PATH")
-
-	env := os.Getenv("MILELANE_ENV")
-	switch env {
-	case "development":
-		configFilePath = basePath + "config/development.toml"
-	case "production":
-		configFilePath = basePath + "config/production.toml"
-	case "test":
-		configFilePath = basePath + "config/test.toml"
-	default:
-		configFilePath = basePath + "config/development.toml"
+func connectDB() *gorm.DB {
+	// Initalize db connection.
+	m := mySQLConfig{
+		Username: os.Getenv("MILELANE_DATABASE_USERNAME"),
+		Password: os.Getenv("MILELANE_DATABASE_PASSWORD"),
+		Host:     os.Getenv("MILELANE_DATABASE_HOST"),
+		Database: os.Getenv("MILELANE_DATABASE"),
 	}
 
-	_, err := toml.DecodeFile(configFilePath, &config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	dbConfig := config.MySQL.Username + ":" + config.MySQL.Password + "@tcp(" + config.MySQL.Host + ":3306)/" + config.MySQL.Database + "?parseTime=true"
-	db, err := gorm.Open("mysql", dbConfig)
+	dbConfigStr := m.Username + ":" + m.Password + "@tcp(" + m.Host + ":3306)/" + m.Database + "?parseTime=true"
+	db, err := gorm.Open("mysql", dbConfigStr)
 
 	for i := 0; i < maxSleepTime; i++ {
-		db, err := gorm.Open("mysql", dbConfig)
+		db, err := gorm.Open("mysql", dbConfigStr)
 		if err == nil {
 			DB = db
 			break
@@ -64,5 +50,5 @@ func init() {
 		panic(err.Error())
 	}
 
-	DB = db
+	return db
 }
