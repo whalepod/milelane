@@ -1,10 +1,11 @@
 package domain
 
 import (
-	"golang.org/x/xerrors"
 	"reflect"
 	"testing"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	"github.com/whalepod/milelane/app/domain/repository"
 )
@@ -160,6 +161,11 @@ func (*TaskAccessorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, chil
 	return nil
 }
 
+func (*TaskAccessorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+	var deviceTask repository.DeviceTask
+	return &deviceTask, nil
+}
+
 type TaskAccessorErrorMock struct{}
 
 func (*TaskAccessorErrorMock) ListTree() (*[]repository.TreeableTask, error) {
@@ -188,6 +194,10 @@ func (*TaskAccessorErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
 
 func (*TaskAccessorErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
 	return xerrors.New("Error mock called.")
+}
+
+func (*TaskAccessorErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+	return nil, xerrors.New("Error mock called.")
 }
 
 type TaskAccessorMoveToChildErrorMock struct{}
@@ -339,6 +349,48 @@ func (*TaskAccessorMoveToChildErrorMock) DeleteAncestorTaskRelations(taskID uint
 
 func (*TaskAccessorMoveToChildErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
 	return xerrors.New("Error mock called.")
+}
+
+func (*TaskAccessorMoveToChildErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+	var deviceTask repository.DeviceTask
+	return &deviceTask, nil
+}
+
+type TaskAccessorCreateDeviceTaskErrorMock struct{}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) ListTree() (*[]repository.TreeableTask, error) {
+	tasks := []repository.TreeableTask{}
+	return &tasks, nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
+	task := repository.TreeableTask{}
+	return &task, nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) Create(title string) (*repository.Task, error) {
+	var task repository.Task
+	return &task, nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
+	return nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateType(id uint, taskType uint) error {
+	return nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
+	return nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
+	return nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+	return nil, xerrors.New("error mock called")
 }
 
 func TestList(t *testing.T) {
