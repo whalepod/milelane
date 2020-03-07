@@ -169,35 +169,35 @@ func (*TaskAccessorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repo
 type TaskAccessorErrorMock struct{}
 
 func (*TaskAccessorErrorMock) ListTree() (*[]repository.TreeableTask, error) {
-	return nil, xerrors.New("Error mock called.")
+	return nil, xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
-	return nil, xerrors.New("Error mock called.")
+	return nil, xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) Create(title string) (*repository.Task, error) {
-	return nil, xerrors.New("Error mock called.")
+	return nil, xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
-	return xerrors.New("Error mock called.")
+	return xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) UpdateType(id uint, taskType uint) error {
-	return xerrors.New("Error mock called.")
+	return xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
-	return xerrors.New("Error mock called.")
+	return xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
-	return xerrors.New("Error mock called.")
+	return xerrors.New("error mock called")
 }
 
 func (*TaskAccessorErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
-	return nil, xerrors.New("Error mock called.")
+	return nil, xerrors.New("error mock called")
 }
 
 type TaskAccessorMoveToChildErrorMock struct{}
@@ -348,7 +348,7 @@ func (*TaskAccessorMoveToChildErrorMock) DeleteAncestorTaskRelations(taskID uint
 }
 
 func (*TaskAccessorMoveToChildErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
-	return xerrors.New("Error mock called.")
+	return xerrors.New("error mock called")
 }
 
 func (*TaskAccessorMoveToChildErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
@@ -474,8 +474,8 @@ func TestListError(t *testing.T) {
 	}
 
 	_, err = task.List()
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
@@ -506,8 +506,8 @@ func TestCreateError(t *testing.T) {
 
 	title := "Test wrong input."
 	_, err = task.Create(title)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
@@ -536,8 +536,8 @@ func TestCompleteError(t *testing.T) {
 	}
 
 	err = task.Complete(1)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
@@ -566,8 +566,8 @@ func TestLanizeError(t *testing.T) {
 	}
 
 	err = task.Lanize(1)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
@@ -596,8 +596,8 @@ func TestMoveToRootError(t *testing.T) {
 	}
 
 	err = task.MoveToRoot(1)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
@@ -626,8 +626,8 @@ func TestMoveToChildErrorOnDeleteAncestorTaskRelations(t *testing.T) {
 	}
 
 	err = task.MoveToChild(1, 2)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success.")
@@ -641,8 +641,8 @@ func TestMoveToChildErrorOnCreateTaskRelationsBetweenTasks(t *testing.T) {
 	}
 
 	err = task.MoveToChild(1, 2)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success.")
