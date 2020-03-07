@@ -6,13 +6,17 @@ import (
 	"github.com/whalepod/milelane/app/domain/repository"
 )
 
+// TaskType contains task type, used to decide which function is available to client.
 type TaskType uint
 
 const (
+	// TypeTask is simple task, which can be done.
 	TypeTask TaskType = iota * 10
+	// TypeLane is abstract task like project, which can not be simply done.
 	TypeLane
 )
 
+// TaskAccessor is interface explaining availble methods to approach persistence layer.
 type TaskAccessor interface {
 	ListTree() (*[]repository.TreeableTask, error)
 	FindTreeByID(id uint) (*repository.TreeableTask, error)
@@ -21,9 +25,10 @@ type TaskAccessor interface {
 	UpdateType(id uint, taskType uint) error
 	DeleteAncestorTaskRelations(taskID uint) error
 	CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error
+	CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error)
 }
 
-// Struct for domain, not for gorm.
+// Task is struct for domain, not for gorm.
 type Task struct {
 	taskAccessor TaskAccessor
 	ID           uint   `json:"id"`
@@ -36,6 +41,7 @@ type Task struct {
 	Children     []Task `json:"children"`
 }
 
+// NewTask returns Task struct with TaskAccessor.
 func NewTask(ta TaskAccessor) (*Task, error) {
 	var t Task
 	t.taskAccessor = ta
@@ -43,6 +49,7 @@ func NewTask(ta TaskAccessor) (*Task, error) {
 	return &t, nil
 }
 
+// List returns nested tasks.
 func (t *Task) List() (*[]Task, error) {
 	var tasks []Task
 	treeableTasks, err := t.taskAccessor.ListTree()
@@ -69,6 +76,7 @@ func (t *Task) List() (*[]Task, error) {
 	return &tasks, nil
 }
 
+// Find returns task and its descendants.
 func (t *Task) Find(id uint) (*Task, error) {
 	var task Task
 	treeableTask, err := t.taskAccessor.FindTreeByID(id)
@@ -114,6 +122,7 @@ func (t *Task) mapChildren(treeableTasks []repository.TreeableTask) Task {
 	return *t
 }
 
+// Create saves task record through persistence layer.
 func (t *Task) Create(title string) (*Task, error) {
 	repositoryTask, err := t.taskAccessor.Create(title)
 	if err != nil {
@@ -132,6 +141,7 @@ func (t *Task) Create(title string) (*Task, error) {
 	return &task, nil
 }
 
+// Complete makes a task done.
 func (t *Task) Complete(id uint) error {
 	err := t.taskAccessor.UpdateCompletedAt(id, time.Now())
 	if err != nil {
@@ -141,6 +151,7 @@ func (t *Task) Complete(id uint) error {
 	return nil
 }
 
+// Lanize makes a task TypeLane.
 func (t *Task) Lanize(id uint) error {
 	err := t.taskAccessor.UpdateType(id, uint(TypeLane))
 	if err != nil {
@@ -150,6 +161,7 @@ func (t *Task) Lanize(id uint) error {
 	return nil
 }
 
+// MoveToRoot moves a task to root directory.
 func (t *Task) MoveToRoot(taskID uint) error {
 	err := t.taskAccessor.DeleteAncestorTaskRelations(taskID)
 	if err != nil {
@@ -159,6 +171,7 @@ func (t *Task) MoveToRoot(taskID uint) error {
 	return nil
 }
 
+// MoveToChild moves childTask under parentTask.
 func (t *Task) MoveToChild(parentTaskID uint, childTaskID uint) error {
 	if err := t.taskAccessor.DeleteAncestorTaskRelations(childTaskID); err != nil {
 		return err
@@ -171,7 +184,7 @@ func (t *Task) MoveToChild(parentTaskID uint, childTaskID uint) error {
 	return nil
 }
 
-// TaskType is compliant with Stringer interface.
+// String makes TaskType compliant with Stringer interface.
 func (t TaskType) String() string {
 	switch t {
 	case TypeTask:
