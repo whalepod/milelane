@@ -30,7 +30,7 @@ func TestRouter(t *testing.T) {
 		t.Fatal("Returned wrong http status.")
 	}
 
-	jsonStr := `{"device_id":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
+	jsonStr := `{"device_token":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
 	res = performRequest(router, "POST", "/device/create", &jsonStr)
 	if http.StatusOK != res.Code {
 		t.Fatal("Returned wrong http status.")
