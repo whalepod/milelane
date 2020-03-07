@@ -2,10 +2,6 @@
 
 # milelane
 
-## How to test
-
-- `go test -coverprofile=cover.out ./... && go tool cover -html=cover.out -o cover.html`
-
 ## Setup with docker-compose
 
 - Install Docker
@@ -19,8 +15,23 @@
 docker-compose up -d
 ```
 
-- Access
+- Healthcheck
 ```
 http://docker-local.milelane.co/tasks
 # => Right after init, it returns null.
 ```
+
+## How to test, lint and auto formatting.
+
+### test
+- `make test`
+    - This command also exports coverage report. To check coverage, `open cover.html`
+
+### auto formatting
+- `make fmt`
+
+### check lint
+- `make lint`
+
+### vet
+- `make vet`
