@@ -56,6 +56,32 @@ func TestTaskCreate(t *testing.T) {
 	t.Log("Success.")
 }
 
+func TestTaskCreateWithDeviceUUID(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks", func(c *gin.Context) {
+		TaskCreate(c)
+	})
+
+	// With valid title, it returns StatusOK.
+	jsonStr := `{"title":"テストタイトル"}`
+	req, _ := http.NewRequest("POST", "/tasks", bytes.NewBuffer([]byte(jsonStr)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Device-UUID", "60982a48-9328-441f-805b-d3ab0cad9e1f")
+	r.ServeHTTP(res, req)
+
+	if http.StatusOK != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	expectedBodyPart := "\"title\":\"テストタイトル\""
+	if !strings.Contains(res.Body.String(), expectedBodyPart) {
+		t.Fatalf("Returned wrong http body. Actual body: %v, Expected to have %v", res.Body.String(), expectedBodyPart)
+	}
+
+	t.Log("Success.")
+}
+
 func TestTaskCreateWithVacantTitle(t *testing.T) {
 	res := httptest.NewRecorder()
 	_, r := gin.CreateTestContext(res)
@@ -123,6 +149,62 @@ func TestTaskCreateFailByInfrastructure(t *testing.T) {
 	}
 
 	infrastructure.DB = originalDB
+	t.Log("Success.")
+}
+
+func TestTaskShow(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.GET("/tasks/:taskID", func(c *gin.Context) {
+		TaskShow(c)
+	})
+
+	// With valid taskID, it returns StatusOK.
+	req, _ := http.NewRequest("GET", "/tasks/1", nil)
+	r.ServeHTTP(res, req)
+
+	if http.StatusOK != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskShowWithNotFoundID(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.GET("/tasks/:taskID", func(c *gin.Context) {
+		TaskShow(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	req, _ := http.NewRequest("GET", "/tasks/9999", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusNotFound != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskShowWithInvalidPath(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.GET("/tasks/:taskID", func(c *gin.Context) {
+		TaskShow(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	req, _ := http.NewRequest("GET", "/tasks/wrong_path", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusBadRequest != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
 	t.Log("Success.")
 }
 
