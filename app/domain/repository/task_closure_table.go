@@ -2,9 +2,10 @@ package repository
 
 import (
 	"fmt"
-	"golang.org/x/xerrors"
 	"strings"
 	"time"
+
+	"golang.org/x/xerrors"
 )
 
 // This file is created to focus on closure table methods of TaskRepository.
@@ -115,6 +116,10 @@ func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 
 	if err := t.DB.Raw(query, id).Scan(&taskWithDepths).Error; err != nil {
 		return nil, err
+	}
+
+	if len(taskWithDepths) == 0 {
+		return nil, xerrors.New("record not found")
 	}
 
 	var treeableTask TreeableTask
