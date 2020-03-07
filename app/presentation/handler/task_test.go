@@ -107,7 +107,7 @@ func TestTaskCreateFailByInfrastructure(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "tasks" ("title","completed_at","created_at","updated_at") VALUES (?,?,?,?)`)).
-		WillReturnError(fmt.Errorf("Task insertion failed."))
+		WillReturnError(fmt.Errorf("Task insertion failed"))
 
 	// Mock infrastructure.DB to test irregular error.
 	originalDB := infrastructure.DB

@@ -49,8 +49,8 @@ func TestCreateWithoutTitle(t *testing.T) {
 	// Set blank title.
 	title := ""
 	_, err := taskRepository.Create(title)
-	if err.Error() != "Title can't have blank value." {
-		t.Fatalf("Got %v\nwant %v", err, "Title can't have blank value.")
+	if err.Error() != "title can't have blank value" {
+		t.Fatalf("Got %v\nwant %v", err, "title can't have blank value")
 	}
 
 	t.Log("Success.")
@@ -63,15 +63,15 @@ func TestCreateRollbackByTaskInsertion(t *testing.T) {
 	mock.ExpectBegin()
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskInsert)).
-		WillReturnError(fmt.Errorf("Task insertion failed."))
+		WillReturnError(fmt.Errorf("Task insertion failed"))
 
 	mock.ExpectRollback()
 
 	taskRepository := NewTask(db)
 	title := "新しいテストタスク"
 	_, err := taskRepository.Create(title)
-	if err.Error() != "Task insertion failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task insertion failed.")
+	if err.Error() != "Task insertion failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task insertion failed")
 	}
 
 	t.Log("Success.")
@@ -87,15 +87,15 @@ func TestCreateRollbackByTaskRelationInsertion(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(2, 1))
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskRelationInsert)).
-		WillReturnError(fmt.Errorf("TaskRelation insertion failed."))
+		WillReturnError(fmt.Errorf("TaskRelation insertion failed"))
 
 	mock.ExpectRollback()
 
 	taskRepository := NewTask(db)
 	title := "新しいテストタスク"
 	_, err := taskRepository.Create(title)
-	if err.Error() != "TaskRelation insertion failed." {
-		t.Fatalf("Got %v\nwant %v", err, "TaskRelation insertion failed.")
+	if err.Error() != "TaskRelation insertion failed" {
+		t.Fatalf("Got %v\nwant %v", err, "TaskRelation insertion failed")
 	}
 
 	t.Log("Success.")
@@ -176,13 +176,13 @@ func TestUpdateTypeSelectionCallsError(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("task selection failed"))
 
 	taskRepository := NewTask(db)
 
 	err := taskRepository.UpdateType(1, 10)
 
-	if err.Error() != "Task selection failed." {
+	if err.Error() != "task selection failed" {
 		t.Fatalf("Got %v\nwant %v", err, "record not found")
 	}
 
@@ -200,14 +200,14 @@ func TestUpdateTypeUpdateCallsError(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateType)).
-		WillReturnError(fmt.Errorf("Updating task failed."))
+		WillReturnError(fmt.Errorf("updating task failed"))
 	mock.ExpectCommit()
 
 	taskRepository := NewTask(db)
 
 	err := taskRepository.UpdateType(1, 10)
 
-	if err.Error() != "Updating task failed." {
+	if err.Error() != "updating task failed" {
 		t.Fatalf("Got %v\nwant %v", err, "record not found")
 	}
 

@@ -113,12 +113,12 @@ func TestTaskTreeFailsScan(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelect)).
-		WillReturnError(fmt.Errorf("Task scanning failed."))
+		WillReturnError(fmt.Errorf("Task scanning failed"))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.ListTree()
-	if err.Error() != "Task scanning failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task scanning failed.")
+	if err.Error() != "Task scanning failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task scanning failed")
 	}
 
 	t.Log("Success.")
@@ -198,12 +198,12 @@ func TestListSelfAndDescendantsCallsError(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.ListSelfAndDescendants(3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -283,12 +283,12 @@ func TestListSelfAndAncestorsCallsError(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.ListSelfAndAncestors(3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -321,12 +321,12 @@ func TestGetLevelError(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
-		WillReturnError(fmt.Errorf("Level acquisition failed."))
+		WillReturnError(fmt.Errorf("level acquisition failed"))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.GetLevel(3)
-	if err.Error() != "Level acquisition failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Level acquisition failed.")
+	if err.Error() != "level acquisition failed" {
+		t.Fatalf("Got %v\nwant %v", err, "level acquisition failed")
 	}
 
 	t.Log("Success.")
@@ -359,12 +359,12 @@ func TestDeleteAncestorTaskRelationsFailsOnGetList(t *testing.T) {
 	db, mock, _ := getDBMock()
 	defer db.Close()
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.DeleteAncestorTaskRelations(3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -382,12 +382,12 @@ func TestDeleteAncestorTaskRelationsFailOnDeletion(t *testing.T) {
 				AddRow("3", "leaf", now, now, now))
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskRelationDeleteAncestors)).
-		WillReturnError(fmt.Errorf("Task deletion failed."))
+		WillReturnError(fmt.Errorf("Task deletion failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.DeleteAncestorTaskRelations(3)
-	if err.Error() != "Task deletion failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task deletion failed.")
+	if err.Error() != "Task deletion failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task deletion failed")
 	}
 
 	t.Log("Success.")
@@ -478,12 +478,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnFindParent(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -499,12 +499,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnFindChild(t *testing.T) {
 				AddRow("2", "テストタスク", now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -525,12 +525,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetParentLevel(t *testing.T) {
 				AddRow("3", "テストタスク", now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
-		WillReturnError(fmt.Errorf("Level acquisition failed."))
+		WillReturnError(fmt.Errorf("level acquisition failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Level acquisition failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Level acquisition failed.")
+	if err.Error() != "level acquisition failed" {
+		t.Fatalf("Got %v\nwant %v", err, "level acquisition failed")
 	}
 
 	t.Log("Success.")
@@ -556,12 +556,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetAncestorList(t *testing.T) {
 				AddRow("2"))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -593,12 +593,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantList(t *testing.T) {
 				AddRow("1", "root", now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
-		WillReturnError(fmt.Errorf("Task selection failed."))
+		WillReturnError(fmt.Errorf("Task selection failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Task selection failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task selection failed.")
+	if err.Error() != "Task selection failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task selection failed")
 	}
 
 	t.Log("Success.")
@@ -637,12 +637,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetAncestorLevel(t *testing.T) {
 
 	// First ancestor loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
-		WillReturnError(fmt.Errorf("Level acquisition failed."))
+		WillReturnError(fmt.Errorf("level acquisition failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Level acquisition failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Level acquisition failed.")
+	if err.Error() != "level acquisition failed" {
+		t.Fatalf("Got %v\nwant %v", err, "level acquisition failed")
 	}
 
 	t.Log("Success.")
@@ -687,12 +687,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantLevel(t *testing.T) {
 
 	// First descendant loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
-		WillReturnError(fmt.Errorf("Level acquisition failed."))
+		WillReturnError(fmt.Errorf("level acquisition failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Level acquisition failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Level acquisition failed.")
+	if err.Error() != "level acquisition failed" {
+		t.Fatalf("Got %v\nwant %v", err, "level acquisition failed")
 	}
 
 	t.Log("Success.")
@@ -741,12 +741,12 @@ func TestCreateTaskRelationsBetweenTasksFailOnInsertion(t *testing.T) {
 
 	// Create section.
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskRelationInsertRegex)).
-		WillReturnError(fmt.Errorf("Task relation insertion failed."))
+		WillReturnError(fmt.Errorf("Task relation insertion failed"))
 
 	taskRepository := NewTask(db)
 	err := taskRepository.CreateTaskRelationsBetweenTasks(2, 3)
-	if err.Error() != "Task relation insertion failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Task relation insertion failed.")
+	if err.Error() != "Task relation insertion failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task relation insertion failed")
 	}
 
 	t.Log("Success.")

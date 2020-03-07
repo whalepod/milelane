@@ -31,8 +31,8 @@ func TestCreateDeviceTaskError(t *testing.T) {
 	deviceUUID := "60982a48-9328-441f-805b-d3ab0cad9e1f"
 	title := "Test wrong input."
 	_, err = task.CreateWithDevice(deviceUUID, title)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")
