@@ -40,7 +40,7 @@ func TestCreateDeviceWithoutDeviceID(t *testing.T) {
 
 	deviceRepository := NewDevice(db)
 
-	// Set blank title.
+	// Set blank token.
 	deviceToken := ""
 	var deviceType uint = 0
 	_, err := deviceRepository.Create(deviceToken, deviceType)
