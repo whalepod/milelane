@@ -9,20 +9,20 @@ import (
 
 type DeviceAccessorMock struct{}
 
-func (*DeviceAccessorMock) Create(deviceID string, deviceType uint) (*repository.Device, error) {
+func (*DeviceAccessorMock) Create(deviceToken string, deviceType uint) (*repository.Device, error) {
 	return &repository.Device{
-		ID:        "60982a48-9328-441f-805b-d3ab0cad9e1f",
-		DeviceID:  "dc625158-a9e9-4b7c-b15a-89991b013147",
-		Type:      0,
-		CreatedAt: now,
-		UpdatedAt: now,
+		UUID:        "60982a48-9328-441f-805b-d3ab0cad9e1f",
+		DeviceToken: "dc625158-a9e9-4b7c-b15a-89991b013147",
+		Type:        0,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}, nil
 }
 
 type DeviceAccessorErrorMock struct{}
 
-func (*DeviceAccessorErrorMock) Create(deviceID string, deviceType uint) (*repository.Device, error) {
-	return nil, xerrors.New("Error mock called.")
+func (*DeviceAccessorErrorMock) Create(deviceToken string, deviceType uint) (*repository.Device, error) {
+	return nil, xerrors.New("error mock called")
 }
 
 var deviceTypeStrs = []string{
@@ -40,10 +40,10 @@ func TestDeviceCreate(t *testing.T) {
 		t.Fatalf("Returned err response: %s", err.Error())
 	}
 
-	deviceID := "dc625158-a9e9-4b7c-b15a-89991b013147"
+	deviceToken := "dc625158-a9e9-4b7c-b15a-89991b013147"
 
 	for _, d := range deviceTypeStrs {
-		_, err = device.Create(deviceID, d)
+		_, err = device.Create(deviceToken, d)
 		if err != nil {
 			t.Fatalf("Returned err response: %s", err.Error())
 		}
@@ -59,11 +59,11 @@ func TestDeviceCreateError(t *testing.T) {
 		t.Fatalf("Returned err response: %s", err.Error())
 	}
 
-	deviceID := ""
+	deviceToken := ""
 	deviceType := "desktop"
-	_, err = device.Create(deviceID, deviceType)
-	if err.Error() != "Error mock called." {
-		t.Fatalf("Got %v\nwant %v", err, "Error mock called.")
+	_, err = device.Create(deviceToken, deviceType)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
 
 	t.Log("Success: Got expected err.")

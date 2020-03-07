@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/whalepod/milelane/app/domain"
 	"github.com/whalepod/milelane/app/domain/repository"
@@ -12,8 +13,8 @@ import (
 
 // DeviceCreateJSON is struct for bind params to create device.
 type DeviceCreateJSON struct {
-	DeviceID   string `json:"device_id" binding:"required,min=1,max=36"`
-	DeviceType string `json:"device_type" binding:"required"`
+	DeviceToken string `json:"device_token" binding:"required,min=1,max=36"`
+	DeviceType  string `json:"device_type" binding:"required"`
 }
 
 // DeviceCreate is handler to create device.
@@ -27,7 +28,7 @@ func DeviceCreate(c *gin.Context) {
 		return
 	}
 
-	device, err := d.Create(j.DeviceID, j.DeviceType)
+	device, err := d.Create(j.DeviceToken, j.DeviceType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
 		return

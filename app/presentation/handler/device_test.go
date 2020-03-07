@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	QueryDeviceInsert = `INSERT INTO "devices" ("id","device_id","type","created_at","updated_at") VALUES (?,?,?,?,?)`
+	QueryDeviceInsert = `INSERT INTO "devices" ("uuid","device_token","type","created_at","updated_at") VALUES (?,?,?,?,?)`
 )
 
 func TestDeviceCreate(t *testing.T) {
@@ -26,7 +26,7 @@ func TestDeviceCreate(t *testing.T) {
 	})
 
 	// With valid title, it returns StatusOK.
-	jsonStr := `{"device_id":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
+	jsonStr := `{"device_token":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
 	req, _ := http.NewRequest("POST", "/device/create", bytes.NewBuffer([]byte(jsonStr)))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(res, req)
@@ -35,7 +35,7 @@ func TestDeviceCreate(t *testing.T) {
 		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
 	}
 
-	expectedBodyPart := "\"device_id\":\"dc625158-a9e9-4b7c-b15a-89991b013147\""
+	expectedBodyPart := "\"device_token\":\"dc625158-a9e9-4b7c-b15a-89991b013147\""
 	if !strings.Contains(res.Body.String(), expectedBodyPart) {
 		t.Fatalf("Returned wrong http body. Actual body: %v, Expected to have %v", res.Body.String(), expectedBodyPart)
 	}
@@ -51,7 +51,7 @@ func TestDeviceCreateWithVacantDeviceID(t *testing.T) {
 	})
 
 	// With wrong device_id, it returns StatusUnprocessableEntity.
-	jsonStr := `{"device_id":""}`
+	jsonStr := `{"device_token":""}`
 	req, _ := http.NewRequest("POST", "/device/create", bytes.NewBuffer([]byte(jsonStr)))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(res, req)
@@ -91,7 +91,7 @@ func TestDeviceCreateWithoutDeviceType(t *testing.T) {
 	})
 
 	// Without device_id key, it returns StatusUnprocessableEntity.
-	jsonStr := `{"device_id":"dc625158-a9e9-4b7c-b15a-89991b013147"}`
+	jsonStr := `{"device_token":"dc625158-a9e9-4b7c-b15a-89991b013147"}`
 	req, _ := http.NewRequest("POST", "/device/create", bytes.NewBuffer([]byte(jsonStr)))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(res, req)
@@ -115,13 +115,13 @@ func TestDeviceCreateFailByInfrastructure(t *testing.T) {
 	defer db.Close()
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryDeviceInsert)).
-		WillReturnError(fmt.Errorf("Device insertion failed."))
+		WillReturnError(fmt.Errorf("Device insertion failed"))
 
 	// Mock infrastructure.DB to test irregular error.
 	originalDB := infrastructure.DB
 	infrastructure.DB = db
 
-	jsonStr := `{"device_id":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
+	jsonStr := `{"device_token":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
 	req, _ := http.NewRequest("POST", "/device/create", bytes.NewBuffer([]byte(jsonStr)))
 	req.Header.Set("Content-Type", "application/json")
 	r.ServeHTTP(res, req)

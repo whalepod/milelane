@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS `devices` (
-  `id` VARCHAR(36) NOT NULL PRIMARY KEY,
-  `device_id` VARCHAR(255) NOT NULL,
+  `uuid` VARCHAR(36) NOT NULL PRIMARY KEY,
+  `device_token` VARCHAR(255) NOT NULL,
   `type` INT UNSIGNED NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `devices` ADD INDEX `idx_device_device_id`(`device_id`);
+ALTER TABLE `devices` ADD INDEX `idx_device_device_token`(`device_token`);
 
 CREATE TABLE IF NOT EXISTS `tasks` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -33,11 +33,11 @@ ALTER TABLE `task_relations` ADD INDEX `idx_task_relation_descendant_id`(`descen
 
 CREATE TABLE IF NOT EXISTS `device_tasks` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `device_id` VARCHAR(36) NOT NULL,
+  `device_uuid` VARCHAR(36) NOT NULL,
   `task_id` INT UNSIGNED NOT NULL,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `device_tasks` ADD INDEX `idx_device_task_device_id`(`device_id`);
+ALTER TABLE `device_tasks` ADD INDEX `idx_device_task_device_uuid`(`device_uuid`);
 ALTER TABLE `device_tasks` ADD INDEX `idx_device_task_task_id`(`task_id`);

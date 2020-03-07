@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	QueryDeviceInsert = `INSERT INTO "devices" ("id","device_id","type","created_at","updated_at") VALUES (?,?,?,?,?)`
+	QueryDeviceInsert = `INSERT INTO "devices" ("uuid","device_token","type","created_at","updated_at") VALUES (?,?,?,?,?)`
 )
 
 func TestCreateDevice(t *testing.T) {
@@ -24,9 +24,9 @@ func TestCreateDevice(t *testing.T) {
 	mock.ExpectCommit()
 
 	deviceRepository := NewDevice(db)
-	deviceID := "561c36de-695d-49e8-b124-57e1f742c90a"
+	deviceToken := "561c36de-695d-49e8-b124-57e1f742c90a"
 	var deviceType uint = 0
-	_, err := deviceRepository.Create(deviceID, deviceType)
+	_, err := deviceRepository.Create(deviceToken, deviceType)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
 	}
@@ -41,11 +41,11 @@ func TestCreateDeviceWithoutDeviceID(t *testing.T) {
 	deviceRepository := NewDevice(db)
 
 	// Set blank title.
-	deviceID := ""
+	deviceToken := ""
 	var deviceType uint = 0
-	_, err := deviceRepository.Create(deviceID, deviceType)
-	if err.Error() != "DeviceID can't have blank value." {
-		t.Fatalf("Got %v\nwant %v", err, "DeviceID can't have blank value.")
+	_, err := deviceRepository.Create(deviceToken, deviceType)
+	if err.Error() != "DeviceToken can't have blank value" {
+		t.Fatalf("Got %v\nwant %v", err, "DeviceToken can't have blank value")
 	}
 
 	t.Log("Success.")
@@ -58,16 +58,16 @@ func TestCreateDeviceRollback(t *testing.T) {
 	mock.ExpectBegin()
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryDeviceInsert)).
-		WillReturnError(fmt.Errorf("Device insertion failed."))
+		WillReturnError(fmt.Errorf("Device insertion failed"))
 
 	mock.ExpectRollback()
 
 	deviceRepository := NewDevice(db)
-	deviceID := "561c36de-695d-49e8-b124-57e1f742c90a"
+	deviceToken := "561c36de-695d-49e8-b124-57e1f742c90a"
 	var deviceType uint = 0
-	_, err := deviceRepository.Create(deviceID, deviceType)
-	if err.Error() != "Device insertion failed." {
-		t.Fatalf("Got %v\nwant %v", err, "Device insertion failed.")
+	_, err := deviceRepository.Create(deviceToken, deviceType)
+	if err.Error() != "Device insertion failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Device insertion failed")
 	}
 
 	t.Log("Success.")
