@@ -95,7 +95,7 @@ func (t *TaskRepository) ListTreeByDeviceUUID(deviceUUID string) (*[]TreeableTas
 			tasks
 		LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id
 		LEFT JOIN device_tasks ON tasks.id = device_tasks.task_id
-		WHERE device_tasks.device_uuid = '?'
+		WHERE device_tasks.device_uuid = ?
 		GROUP BY
 			tasks.id,
 			tasks.title,

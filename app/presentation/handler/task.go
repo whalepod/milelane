@@ -19,10 +19,23 @@ type TaskCreateJSON struct {
 
 // TaskIndex returns all tasks.
 func TaskIndex(c *gin.Context) {
+	deviceUUID := c.GetHeader("X-Device-UUID")
+
 	taskAccessor := repository.NewTask(infrastructure.DB)
 	t, _ := domain.NewTask(taskAccessor)
 
-	tasks, _ := t.List()
+	var tasks *[]domain.Task
+	var err error
+	if deviceUUID != "" {
+		tasks, err = t.ListByDeviceUUID(deviceUUID)
+	} else {
+		tasks, err = t.List()
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, tasks)
 }

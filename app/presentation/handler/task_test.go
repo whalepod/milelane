@@ -14,6 +14,10 @@ import (
 	"github.com/whalepod/milelane/app/infrastructure"
 )
 
+const (
+	QueryTaskTreeSelect = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+)
+
 func TestTaskIndex(t *testing.T) {
 	res := httptest.NewRecorder()
 	_, r := gin.CreateTestContext(res)
@@ -26,6 +30,54 @@ func TestTaskIndex(t *testing.T) {
 
 	if http.StatusOK != res.Code {
 		t.Fatal("Returned wrong http status.")
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskIndexFailByInfrastructure(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.GET("/tasks", func(c *gin.Context) {
+		TaskIndex(c)
+	})
+
+	// In case infrastructure.DB broken, it returns StatusInternalServerError.
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskTreeSelect)).
+		WillReturnError(fmt.Errorf("Task insertion failed"))
+
+	// Mock infrastructure.DB to test irregular error.
+	originalDB := infrastructure.DB
+	infrastructure.DB = db
+
+	req, _ := http.NewRequest("GET", "/tasks", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusInternalServerError != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	infrastructure.DB = originalDB
+	t.Log("Success.")
+}
+
+func TestTaskIndexWithDeviceUUID(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.GET("/tasks", func(c *gin.Context) {
+		TaskIndex(c)
+	})
+
+	req, _ := http.NewRequest("GET", "/tasks", nil)
+	req.Header.Set("X-Device-UUID", "60982a48-9328-441f-805b-d3ab0cad9e1f")
+	r.ServeHTTP(res, req)
+
+	if http.StatusOK != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
 	}
 
 	t.Log("Success.")
