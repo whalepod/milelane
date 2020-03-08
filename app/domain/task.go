@@ -17,8 +17,15 @@ const (
 )
 
 // TaskAccessor is interface explaining availble methods to approach persistence layer.
+// Implementation(s) of TaskAccessor is/are
+// - TaskRepository.
+// - TaskAccessorMock (in test).
+// - TaskAccessorErrorMock (in test).
+// - TaskAccessorMoveToChildErrorMock (in test).
+// - TaskAccessorCreateDeviceTaskErrorMock (in test).
 type TaskAccessor interface {
 	ListTree() (*[]repository.TreeableTask, error)
+	ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error)
 	FindTreeByID(id uint) (*repository.TreeableTask, error)
 	Create(title string) (*repository.Task, error)
 	UpdateCompletedAt(id uint, completedAt time.Time) error

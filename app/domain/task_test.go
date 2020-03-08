@@ -77,6 +77,71 @@ func (*TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {
 	return &tasks, nil
 }
 
+func (*TaskAccessorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
+	tasks := []repository.TreeableTask{
+		{
+			Task: repository.Task{
+				ID:          1,
+				Title:       "trunk",
+				Type:        uint(TypeLane),
+				CompletedAt: &now,
+				CreatedAt:   now,
+				UpdatedAt:   now,
+			},
+			Depth: 1,
+			Children: []repository.TreeableTask{
+				{
+					Task: repository.Task{
+						ID:          2,
+						Title:       "branch",
+						Type:        uint(TypeTask),
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+					Children: []repository.TreeableTask{
+						{
+							Task: repository.Task{
+								ID:          3,
+								Title:       "leaf",
+								Type:        uint(TypeTask),
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+						{
+							Task: repository.Task{
+								ID:          5,
+								Title:       "leaf-2",
+								Type:        uint(TypeTask),
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+					},
+				},
+				{
+					Task: repository.Task{
+						ID:          4,
+						Title:       "branch-2",
+						Type:        uint(TypeTask),
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+				},
+			},
+		},
+	}
+	return &tasks, nil
+}
+
 func (*TaskAccessorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
 	task := repository.TreeableTask{
 		Task: repository.Task{
@@ -172,6 +237,10 @@ func (*TaskAccessorErrorMock) ListTree() (*[]repository.TreeableTask, error) {
 	return nil, xerrors.New("error mock called")
 }
 
+func (*TaskAccessorErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
+	return nil, xerrors.New("error mock called")
+}
+
 func (*TaskAccessorErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
 	return nil, xerrors.New("error mock called")
 }
@@ -203,6 +272,71 @@ func (*TaskAccessorErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (
 type TaskAccessorMoveToChildErrorMock struct{}
 
 func (*TaskAccessorMoveToChildErrorMock) ListTree() (*[]repository.TreeableTask, error) {
+	tasks := []repository.TreeableTask{
+		{
+			Task: repository.Task{
+				ID:          1,
+				Title:       "trunk",
+				Type:        uint(TypeLane),
+				CompletedAt: &now,
+				CreatedAt:   now,
+				UpdatedAt:   now,
+			},
+			Depth: 1,
+			Children: []repository.TreeableTask{
+				{
+					Task: repository.Task{
+						ID:          2,
+						Title:       "branch",
+						Type:        uint(TypeTask),
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+					Children: []repository.TreeableTask{
+						{
+							Task: repository.Task{
+								ID:          3,
+								Title:       "leaf",
+								Type:        uint(TypeTask),
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+						{
+							Task: repository.Task{
+								ID:          5,
+								Title:       "leaf-2",
+								Type:        uint(TypeTask),
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+					},
+				},
+				{
+					Task: repository.Task{
+						ID:          4,
+						Title:       "branch-2",
+						Type:        uint(TypeTask),
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+				},
+			},
+		},
+	}
+	return &tasks, nil
+}
+
+func (*TaskAccessorMoveToChildErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
 	tasks := []repository.TreeableTask{
 		{
 			Task: repository.Task{
@@ -359,6 +493,11 @@ func (*TaskAccessorMoveToChildErrorMock) CreateDeviceTask(deviceUUID string, tas
 type TaskAccessorCreateDeviceTaskErrorMock struct{}
 
 func (*TaskAccessorCreateDeviceTaskErrorMock) ListTree() (*[]repository.TreeableTask, error) {
+	tasks := []repository.TreeableTask{}
+	return &tasks, nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
 	tasks := []repository.TreeableTask{}
 	return &tasks, nil
 }
