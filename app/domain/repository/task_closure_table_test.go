@@ -11,6 +11,8 @@ import (
 
 const (
 	QueryTaskTreeSelect               = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelectByDeviceUUID   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id LEFT JOIN device_tasks ON tasks.id = device_tasks.task_id WHERE device_tasks.device_uuid = '?' GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelectByTaskID       = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE ( tasks.id IN ( SELECT tasks.id FROM tasks LEFT JOIN task_relations ON tasks.id = task_relations.descendant_id WHERE ( task_relations.ancestor_id = ? ) ) ) GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
 	QueryTaskSelectSelfAndDescendants = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE descendant_relations.ancestor_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.path_length ORDER BY descendant_relations.path_length asc`
 	QueryTaskSelectSelfAndAncestors   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS ancestor_relations ON tasks.id = ancestor_relations.ancestor_id WHERE ancestor_relations.descendant_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, ancestor_relations.path_length ORDER BY ancestor_relations.path_length asc`
 	QueryTaskSelectPathLength         = `SELECT max(path_length) AS path_length FROM task_relations WHERE descendant_id = ?`
@@ -20,8 +22,7 @@ const (
 	QueryTaskRelationInsertRegex      = `INSERT INTO task_relations`
 )
 
-func TestTaskTree(t *testing.T) {
-	// var expectedTreeableTasks []TreeableTask
+func TestListTree(t *testing.T) {
 	expectedTreeableTasks := []TreeableTask{
 		{
 			Task: Task{
@@ -108,7 +109,7 @@ func TestTaskTree(t *testing.T) {
 	t.Log("Success.")
 }
 
-func TestTaskTreeFailsScan(t *testing.T) {
+func TestListTreeFailsScan(t *testing.T) {
 	db, mock, _ := getDBMock()
 	defer db.Close()
 
@@ -119,6 +120,204 @@ func TestTaskTreeFailsScan(t *testing.T) {
 	_, err := taskRepository.ListTree()
 	if err.Error() != "Task scanning failed" {
 		t.Fatalf("Got %v\nwant %v", err, "Task scanning failed")
+	}
+
+	t.Log("Success.")
+}
+
+func TestListTreeByDeviceUUID(t *testing.T) {
+	expectedTreeableTasks := []TreeableTask{
+		{
+			Task: Task{
+				ID:          1,
+				Title:       "trunk",
+				CompletedAt: &now,
+				CreatedAt:   now,
+				UpdatedAt:   now,
+			},
+			Depth: 1,
+			Children: []TreeableTask{
+				{
+					Task: Task{
+						ID:          2,
+						Title:       "branch",
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+					Children: []TreeableTask{
+						{
+							Task: Task{
+								ID:          3,
+								Title:       "leaf",
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+						{
+							Task: Task{
+								ID:          5,
+								Title:       "leaf-2",
+								CompletedAt: &now,
+								CreatedAt:   now,
+								UpdatedAt:   now,
+							},
+							Depth: 3,
+						},
+					},
+				},
+				{
+					Task: Task{
+						ID:          4,
+						Title:       "branch-2",
+						CompletedAt: &now,
+						CreatedAt:   now,
+						UpdatedAt:   now,
+					},
+					Depth: 2,
+				},
+			},
+		},
+	}
+
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByDeviceUUID)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}).
+				AddRow("1", "trunk", now, now, now, 1).
+				AddRow("2", "branch", now, now, now, 2).
+				AddRow("3", "leaf", now, now, now, 3).
+				AddRow("5", "leaf-2", now, now, now, 3).
+				AddRow("4", "branch-2", now, now, now, 2))
+
+	taskRepository := NewTask(db)
+	deviceUUID := "60982a48-9328-441f-805b-d3ab0cad9e1f"
+	tasks, err := taskRepository.ListTreeByDeviceUUID(deviceUUID)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	if len(*tasks) == 0 {
+		t.Fatalf("No treeable task mapped.")
+	}
+
+	if !reflect.DeepEqual(*tasks, expectedTreeableTasks) {
+		t.Fatalf("Got wrong tasks. Want: %v, Got: %v", expectedTreeableTasks[0].Children, (*tasks)[0].Children)
+	}
+
+	t.Log("Success.")
+}
+
+func TestListTreeByDeviceUUIDFailsScan(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByDeviceUUID)).
+		WillReturnError(fmt.Errorf("Task scanning failed"))
+
+	deviceUUID := "60982a48-9328-441f-805b-d3abnoresult"
+	taskRepository := NewTask(db)
+	_, err := taskRepository.ListTreeByDeviceUUID(deviceUUID)
+	if err.Error() != "Task scanning failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task scanning failed")
+	}
+
+	t.Log("Success.")
+}
+
+func TestFindTreeByID(t *testing.T) {
+	expectedTreeableTask := TreeableTask{
+		Task: Task{
+			ID:          2,
+			Title:       "branch",
+			CompletedAt: &now,
+			CreatedAt:   now,
+			UpdatedAt:   now,
+		},
+		Depth: 2,
+		Children: []TreeableTask{
+			{
+				Task: Task{
+					ID:          3,
+					Title:       "leaf",
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 3,
+			},
+			{
+				Task: Task{
+					ID:          5,
+					Title:       "leaf-2",
+					CompletedAt: &now,
+					CreatedAt:   now,
+					UpdatedAt:   now,
+				},
+				Depth: 3,
+			},
+		},
+	}
+
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByTaskID)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}).
+				AddRow("2", "branch", now, now, now, 2).
+				AddRow("3", "leaf", now, now, now, 3).
+				AddRow("5", "leaf-2", now, now, now, 3))
+
+	taskRepository := NewTask(db)
+	var id uint = 2
+	task, err := taskRepository.FindTreeByID(id)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	if !reflect.DeepEqual(*task, expectedTreeableTask) {
+		t.Fatalf("Got wrong tasks. Want: %v, Got: %v", expectedTreeableTask, *task)
+	}
+
+	t.Log("Success.")
+}
+
+func TestFindTreeByIDFailsScan(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByTaskID)).
+		WillReturnError(fmt.Errorf("Task scanning failed"))
+
+	var id uint = 2
+	taskRepository := NewTask(db)
+	_, err := taskRepository.FindTreeByID(id)
+	if err.Error() != "Task scanning failed" {
+		t.Fatalf("Got %v\nwant %v", err, "Task scanning failed")
+	}
+
+	t.Log("Success.")
+}
+
+func TestFindTreeByIDErrorRecordNotFound(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByTaskID)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}))
+
+	var id uint = 9999
+	taskRepository := NewTask(db)
+	_, err := taskRepository.FindTreeByID(id)
+	if err.Error() != "record not found" {
+		t.Fatalf("Got %v\nwant %v", err, "record not found")
 	}
 
 	t.Log("Success.")

@@ -11,17 +11,20 @@ import (
 // This file is created to focus on closure table methods of TaskRepository.
 // Base methods are placed in `app/domain/repository/task.go`.
 
+// TreeableTask is extended task struct which can contain nested task.
 type TreeableTask struct {
 	Task
 	Depth    uint
 	Children []TreeableTask
 }
 
+// TaskWithDepth is extended task struct which has depth from root directory.
 type TaskWithDepth struct {
 	Task
 	Depth uint
 }
 
+// ListTree returns all tasks formatted into TreeableTask.
 func (t *TaskRepository) ListTree() (*[]TreeableTask, error) {
 	var taskWithDepths []TaskWithDepth
 
@@ -67,6 +70,55 @@ func (t *TaskRepository) ListTree() (*[]TreeableTask, error) {
 	return &treeableTask.Children, nil
 }
 
+// ListTreeByDeviceUUID returns tasks formatted into TreeableTask selected by `device_tasks.device_uuid`.
+func (t *TaskRepository) ListTreeByDeviceUUID(deviceUUID string) (*[]TreeableTask, error) {
+	var taskWithDepths []TaskWithDepth
+
+	// The result of this query is ordered by materialized path like `3,5,6,12`
+	// WANTFIX:
+	// id sort works like below,
+	// ```
+	// ID: 1, 10, 100, 2, 20, 200, ...
+	// ```
+	// because id is handled as string in this rule.
+	// root level sorting should be done with id as integer.
+	query := `
+		SELECT
+			tasks.id,
+			tasks.title,
+			tasks.type,
+			tasks.completed_at,
+			tasks.created_at,
+			tasks.updated_at,
+			max(descendant_relations.path_length) AS depth
+		FROM
+			tasks
+		LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id
+		LEFT JOIN device_tasks ON tasks.id = device_tasks.task_id
+		WHERE device_tasks.device_uuid = '?'
+		GROUP BY
+			tasks.id,
+			tasks.title,
+			tasks.type,
+			tasks.completed_at,
+			tasks.created_at,
+			tasks.updated_at,
+			descendant_relations.descendant_id
+		ORDER BY
+			group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id
+	`
+
+	if err := t.DB.Raw(query, deviceUUID).Scan(&taskWithDepths).Error; err != nil {
+		return nil, err
+	}
+
+	var treeableTask TreeableTask
+	treeableTask, _ = t.appendChildren(treeableTask, taskWithDepths, 0)
+
+	return &treeableTask.Children, nil
+}
+
+// FindTreeByID returns a treeableTask selected by `tasks.id`.
 func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 	var taskWithDepths []TaskWithDepth
 
@@ -156,6 +208,7 @@ func (t *TaskRepository) appendChildren(tree TreeableTask, tasks []TaskWithDepth
 	return tree, idx
 }
 
+// ListSelfAndDescendants returns tasks those have same ancestor which is specified by variable.
 func (t *TaskRepository) ListSelfAndDescendants(taskID uint) (*[]Task, error) {
 	var tasks []Task
 
@@ -195,6 +248,7 @@ func (t *TaskRepository) ListSelfAndDescendants(taskID uint) (*[]Task, error) {
 	return &tasks, nil
 }
 
+// ListSelfAndAncestors returns tasks those have same descendant which is specified by variable.
 func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 	var tasks []Task
 
@@ -234,6 +288,7 @@ func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 	return &tasks, nil
 }
 
+// GetLevel returns a task's level.
 func (t *TaskRepository) GetLevel(taskID uint) (uint, error) {
 	level := struct{ PathLength uint }{}
 
@@ -249,6 +304,7 @@ func (t *TaskRepository) GetLevel(taskID uint) (uint, error) {
 	return level.PathLength, nil
 }
 
+// DeleteAncestorTaskRelations deletes all ancestor relations.
 func (t *TaskRepository) DeleteAncestorTaskRelations(taskID uint) error {
 	descendantTasks, err := t.ListSelfAndDescendants(taskID)
 	if err != nil {
@@ -273,6 +329,7 @@ func (t *TaskRepository) DeleteAncestorTaskRelations(taskID uint) error {
 	return nil
 }
 
+// CreateTaskRelationsBetweenTasks saves new relations between 2 tasks.
 func (t *TaskRepository) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
 	var taskRelations []TaskRelation
 
