@@ -17,6 +17,10 @@ const (
 )
 
 // DeviceAccessor gives access to persistence layer.
+// Implementation(s) of DeviceAccessor is/are
+// - DeviceRepository.
+// - DeviceAccessorMock (in test).
+// - DeviceAccessorErrorMock (in test).
 type DeviceAccessor interface {
 	Create(deviceToken string, deviceType uint) (*repository.Device, error)
 }
