@@ -7,10 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CORSHeaders enable gin to check CORS request.
+// This prohibit unauthorized access.
+// TODO: disable access from unpermitted ip/hosts.
 func CORSHeaders() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowMethods: []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders: []string{"Access-Control-Allow-Headers", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		AllowHeaders: []string{
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"X-CSRF-Token",
+			"X-Device-UUID",
+			"Authorization",
+		},
 		// Allow every request until which request should be allowed is decided.
 		AllowOriginFunc: func(origin string) bool {
 			return true

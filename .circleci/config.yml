@@ -10,8 +10,6 @@ jobs:
       - image: circleci/golang:1.13.1
         environment:
           GO111MODULE: "on"
-          MILELANE_PATH: /go/src/github.com/whalepod/milelane/
-          MILELANE_ENV: test
       - image: circleci/mysql:5.7.26
         environment: # environment variables for primary container
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
@@ -35,6 +33,11 @@ jobs:
           name: "Create a tmp directory for artifacts which is used for codecov."
           command: |
             mkdir -p /tmp/artifacts
+      - run:
+          name: "Execute lint."
+          command: |
+            GO111MODULE=off go get golang.org/x/lint/golint
+            golint -set_exit_status ./...
       - run:
           name: "Execute test and get coverage report."
           command: |
