@@ -620,6 +620,94 @@ func TestListError(t *testing.T) {
 	t.Log("Success: Got expected err.")
 }
 
+func TestFind(t *testing.T) {
+	var taskAccessor TaskAccessorMock
+	// Avoid conflict with comparing task object.
+	ta, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	var id uint = 1
+	task, err := ta.Find(id)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	// Initialize task to be compared.
+	expectedTask := Task{
+		ID:          1,
+		Title:       "trunk",
+		Type:        TypeLane.String(),
+		CompletedAt: (&now).Format("2006-01-02 15:04:05"),
+		CreatedAt:   now.Format("2006-01-02 15:04:05"),
+		UpdatedAt:   now.Format("2006-01-02 15:04:05"),
+		Depth:       1,
+		Children: []Task{
+			{
+				ID:          2,
+				Title:       "branch",
+				Type:        TypeTask.String(),
+				CompletedAt: (&now).Format("2006-01-02 15:04:05"),
+				CreatedAt:   now.Format("2006-01-02 15:04:05"),
+				UpdatedAt:   now.Format("2006-01-02 15:04:05"),
+				Depth:       2,
+				Children: []Task{
+					{
+						ID:          3,
+						Title:       "leaf",
+						Type:        TypeTask.String(),
+						CompletedAt: (&now).Format("2006-01-02 15:04:05"),
+						CreatedAt:   now.Format("2006-01-02 15:04:05"),
+						UpdatedAt:   now.Format("2006-01-02 15:04:05"),
+						Depth:       3,
+					},
+					{
+						ID:          5,
+						Title:       "leaf-2",
+						Type:        TypeTask.String(),
+						CompletedAt: (&now).Format("2006-01-02 15:04:05"),
+						CreatedAt:   now.Format("2006-01-02 15:04:05"),
+						UpdatedAt:   now.Format("2006-01-02 15:04:05"),
+						Depth:       3,
+					},
+				},
+			},
+			{
+				ID:          4,
+				Title:       "branch-2",
+				Type:        TypeTask.String(),
+				CompletedAt: (&now).Format("2006-01-02 15:04:05"),
+				CreatedAt:   now.Format("2006-01-02 15:04:05"),
+				UpdatedAt:   now.Format("2006-01-02 15:04:05"),
+				Depth:       2,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedTask, *task) {
+		t.Fatalf("Got wrong uncompleted task. Want: %v, Got: %v,  ", expectedTask, *task)
+	}
+
+	t.Log("Success.")
+}
+
+func TestFindError(t *testing.T) {
+	var taskAccessor TaskAccessorErrorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	var id uint = 1
+	_, err = task.Find(id)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
+	}
+
+	t.Log("Success: Got expected err.")
+}
+
 func TestCreate(t *testing.T) {
 	var taskAccessor TaskAccessorMock
 	task, err := NewTask(&taskAccessor)
