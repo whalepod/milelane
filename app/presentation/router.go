@@ -7,6 +7,7 @@ import (
 	"github.com/whalepod/milelane/app/presentation/middleware"
 )
 
+// Router returns http router.
 func Router() *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORSHeaders())
