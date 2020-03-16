@@ -24,3 +24,9 @@ docker-compose up -d
 http://docker-local.milelane.co/tasks
 # => Right after init, it returns null.
 ```
+
+## Setup Database
+```
+$ docker exec -i -t milelane_mysql_1 bash
+$ mysql -u root -h 127.0.0.1 milelane < docker-entrypoint-initdb.d/schema.sql
+```
