@@ -137,6 +137,7 @@ func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			max(descendant_relations.path_length) AS depth
@@ -160,6 +161,7 @@ func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at
 		ORDER BY
@@ -194,6 +196,7 @@ func (t *TaskRepository) appendChildren(tree TreeableTask, tasks []TaskWithDepth
 				Title:       task.Title,
 				Type:        task.Type,
 				CompletedAt: task.CompletedAt,
+				ExpiresAt:   task.ExpiresAt,
 				CreatedAt:   task.CreatedAt,
 				UpdatedAt:   task.UpdatedAt,
 			},
@@ -258,6 +261,7 @@ func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at
 		FROM tasks
@@ -269,6 +273,7 @@ func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			ancestor_relations.path_length

@@ -42,6 +42,7 @@ type Task struct {
 	Title        string `json:"title"`
 	Type         string `json:"type"`
 	CompletedAt  string `json:"completed_at"`
+	ExpiresAt    string `json:"expires_at"`
 	CreatedAt    string `json:"created_at"`
 	UpdatedAt    string `json:"updated_at"`
 	Depth        uint   `json:"depth"`
@@ -69,6 +70,7 @@ func (t *Task) List() (*[]Task, error) {
 			ID:        treeableTask.ID,
 			Title:     treeableTask.Title,
 			Type:      TaskType(treeableTask.Type).String(),
+			ExpiresAt: treeableTask.ExpiresAt.Format("2006-01-02 15:04:05"),
 			CreatedAt: treeableTask.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt: treeableTask.UpdatedAt.Format("2006-01-02 15:04:05"),
 			Depth:     treeableTask.Depth,
@@ -92,9 +94,10 @@ func (t *Task) Find(id uint) (*Task, error) {
 	}
 
 	task = Task{
-		ID:        treeableTask.ID,
-		Title:     treeableTask.Title,
-		Type:      TaskType(treeableTask.Type).String(),
+		ID:    treeableTask.ID,
+		Title: treeableTask.Title,
+		Type:  TaskType(treeableTask.Type).String(),
+
 		CreatedAt: treeableTask.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt: treeableTask.UpdatedAt.Format("2006-01-02 15:04:05"),
 		Depth:     treeableTask.Depth,
@@ -140,6 +143,7 @@ func (t *Task) Create(title string) (*Task, error) {
 		ID:        (*repositoryTask).ID,
 		Title:     (*repositoryTask).Title,
 		Type:      TaskType((*repositoryTask).Type).String(),
+		ExpiresAt: (*repositoryTask).ExpiresAt.Format("2006-01-02 15:04:05"),
 		CreatedAt: (*repositoryTask).CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt: (*repositoryTask).UpdatedAt.Format("2006-01-02 15:04:05"),
 		Depth:     1,
