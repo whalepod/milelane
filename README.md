@@ -35,3 +35,8 @@ http://docker-local.milelane.co/tasks
 
 ### vet
 - `make vet`
+
+## How to migrate
+### dev
+export USER_NAME=root
+export DATABASE=milelane
