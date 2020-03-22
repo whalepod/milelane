@@ -20,6 +20,7 @@ type Task struct {
 	Title       string     `gorm:"not null;index"`
 	Type        uint       `gorm:"not null"`
 	CompletedAt *time.Time `sql:"type:datetime"`
+	ExpiresAt   *time.Time `sql:"type:datetime"`
 	CreatedAt   time.Time  `gorm:"not null" sql:"type:datetime"`
 	UpdatedAt   time.Time  `gorm:"not null" sql:"type:datetime"`
 }
