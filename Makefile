@@ -1,7 +1,6 @@
 .PHONY: help
 
 .DEFAULT_GOAL := help
-_spanner='spanner://projects/$(PROJECT_ID)/instances/$(INSTANCE)/databases/$(DATABASE)' -path ./spanner
 _mysql=${USER_NAME}:${PASSWARD}@/${DATABASE}?parseTime=true
 
 help:
