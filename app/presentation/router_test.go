@@ -67,5 +67,10 @@ func TestRouter(t *testing.T) {
 		t.Fatal("Returned wrong http status.")
 	}
 
+	res = performRequest(router, "GET", "/healthcheck", nil)
+	if http.StatusOK != res.Code {
+		t.Fatal("Returned wrong http status.")
+	}
+
 	t.Log("Success.")
 }

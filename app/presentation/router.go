@@ -1,6 +1,8 @@
 package presentation
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/whalepod/milelane/app/presentation/handler"
@@ -42,6 +44,10 @@ func Router() *gin.Engine {
 
 	r.POST("/tasks/:taskID/move-to-child/:parentTaskID", func(c *gin.Context) {
 		handler.TaskMoveToChild(c)
+	})
+
+	r.GET("/healthcheck", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
 	})
 
 	return r
