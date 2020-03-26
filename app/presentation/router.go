@@ -46,7 +46,8 @@ func Router() *gin.Engine {
 		handler.TaskMoveToChild(c)
 	})
 
-	r.GET("/healthcheck", func(c *gin.Context) {
+	// `/` endpoint is used to healthcheck.
+	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
 
