@@ -13,7 +13,12 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/lib/pq v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pressly/goose v2.6.0+incompatible
+	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect

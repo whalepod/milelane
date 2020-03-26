@@ -41,3 +41,20 @@ $ mysql -u root -h 127.0.0.1 milelane < docker-entrypoint-initdb.d/schema.sql
 
 ### vet
 - `make vet`
+
+## How to migrate
+We use [goose](https://github.com/pressly/goose) to migrate.
+
+### Set env variable
+You need to set environment variable.
+
+#### dev
+export USER_NAME=root
+export DATABASE=milelane
+
+### Command
+#### Create migration file
+- `make migrate-create NAME=xxx_yyy_zzz`
+
+#### Apply migration
+- `migrate-up`
