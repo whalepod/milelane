@@ -23,9 +23,13 @@ http://docker-local.milelane.co/tasks
 
 ## Setup Database
 ```
-$ docker exec -i -t milelane_mysql_1 bash
-$ mysql -u root -h 127.0.0.1 milelane < docker-entrypoint-initdb.d/schema.sql
+$ export USER_NAME=root
+$ export DATABASE=milelane
 ```
+
+### How to migrate
+We use [goose](https://github.com/pressly/goose) to migrate.
+Show Makefile to migrate.
 
 ## How to test, lint and auto formatting.
 
@@ -41,9 +45,6 @@ $ mysql -u root -h 127.0.0.1 milelane < docker-entrypoint-initdb.d/schema.sql
 
 ### vet
 - `make vet`
-
-## How to migrate
-We use [goose](https://github.com/pressly/goose) to migrate.
 
 ### Set env variable
 You need to set environment variable.
