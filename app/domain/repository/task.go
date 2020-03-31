@@ -86,8 +86,9 @@ func (t *TaskRepository) UpdateTitle(id uint, title string) error {
 		return err
 	}
 
-	// This won't happen expected error.
-	t.DB.Model(&task).Update("title", title)
+	if err := t.DB.Model(&task).Update("title", title).Error; err != nil {
+		return err
+	}
 	return nil
 }
 
