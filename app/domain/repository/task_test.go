@@ -13,6 +13,7 @@ const (
 	QueryTaskRelationInsert    = `INSERT INTO "task_relations" ("ancestor_id","descendant_id","path_length","created_at","updated_at") VALUES (?,?,?,?,?)`
 	QueryTaskSelect            = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 1)`
 	QueryTaskUpdateCompletedAt = `UPDATE "tasks" SET "completed_at" = ?`
+	QueryTaskUpdateTitle       = `UPDATE "tasks" SET "title" = ?`
 	QueryTaskUpdateType        = `UPDATE "tasks" SET "type" = ?`
 )
 
@@ -137,6 +138,50 @@ func TestUpdateCompletedAtWithNotFoundID(t *testing.T) {
 	taskRepository := NewTask(db)
 
 	err := taskRepository.UpdateCompletedAt(1, now)
+
+	if err.Error() != "record not found" {
+		t.Fatalf("Got %v\nwant %v", err, "record not found")
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateTitle(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateTitle)).
+		WithArgs(now, AnyTime{}, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateTitle(1, "Update test")
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateTitleWithNotFoundID(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}))
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateTitle(1, "Update test")
 
 	if err.Error() != "record not found" {
 		t.Fatalf("Got %v\nwant %v", err, "record not found")
