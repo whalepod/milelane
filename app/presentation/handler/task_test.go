@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
 
 	"github.com/whalepod/milelane/app/infrastructure"
@@ -313,6 +314,142 @@ func TestTaskCompleteWithInvalidPath(t *testing.T) {
 		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
 	}
 
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitle(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// With valid taskID and title, it returns StatusOK.
+	jsonStr := `{"title":"Update test"}`
+	req, _ := http.NewRequest("POST", "/tasks/1/update-title", bytes.NewBuffer([]byte(jsonStr)))
+	r.ServeHTTP(res, req)
+
+	if http.StatusOK != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitleWithNotFoundID(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	jsonStr := `{"title":"Update test"}`
+	req, _ := http.NewRequest("POST", "/tasks/9999/update-title", bytes.NewBuffer([]byte(jsonStr)))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusNotFound != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitleWithInvalidPath(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	jsonStr := `{"title":"Update test"}`
+	req, _ := http.NewRequest("POST", "/tasks/wrong_path/update-title", bytes.NewBuffer([]byte(jsonStr)))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusBadRequest != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitleWithVacantTitle(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// With wrong title, it returns StatusUnprocessableEntity.
+	jsonStr := `{"title":""}`
+	req, _ := http.NewRequest("POST", "/tasks/1/update-title", bytes.NewBuffer([]byte(jsonStr)))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusUnprocessableEntity != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitleWithoutTitle(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// Without title key, it returns StatusUnprocessableEntity.
+	req, _ := http.NewRequest("POST", "/tasks/1/update-title", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusUnprocessableEntity != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskUpdateTitleFailByInfrastructure(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		TaskUpdateTitle(c)
+	})
+
+	// In case infrastructure.DB broken, it returns StatusInternalServerError.
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "tasks" WHERE ("tasks"."id" = 1)`)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "tasks" SET "title" = ?`)).
+		WillReturnError(fmt.Errorf("Task update failed"))
+	mock.ExpectCommit()
+
+	// Mock infrastructure.DB to test irregular error.
+	originalDB := infrastructure.DB
+	infrastructure.DB = db
+
+	jsonStr := `{"title":"テストタイトル"}`
+	req, _ := http.NewRequest("POST", "/tasks/1/update-title", bytes.NewBuffer([]byte(jsonStr)))
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusInternalServerError != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	infrastructure.DB = originalDB
 	t.Log("Success.")
 }
 

@@ -17,6 +17,11 @@ type TaskCreateJSON struct {
 	Title string `json:"title" binding:"required,min=1,max=255"`
 }
 
+// TaskUpdateTitleJSON is struct for binding update request params.
+type TaskUpdateTitleJSON struct {
+	Title string `json:"title" binding:"required,min=1,max=255"`
+}
+
 // TaskIndex returns all tasks.
 func TaskIndex(c *gin.Context) {
 	deviceUUID := c.GetHeader("X-Device-UUID")
@@ -76,6 +81,7 @@ func TaskShow(c *gin.Context) {
 	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
 	}
 
 	taskID := uint(taskIDInt)
@@ -84,6 +90,7 @@ func TaskShow(c *gin.Context) {
 	if err != nil {
 		// In this case, possible error would be record not found.
 		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, task)
@@ -97,6 +104,7 @@ func TaskComplete(c *gin.Context) {
 	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
 	}
 
 	taskID := uint(taskIDInt)
@@ -105,6 +113,39 @@ func TaskComplete(c *gin.Context) {
 	if err != nil {
 		// In this case, possible error would be record not found.
 		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// TaskUpdateTitle changes a task title.
+func TaskUpdateTitle(c *gin.Context) {
+	taskAccessor := repository.NewTask(infrastructure.DB)
+	t, _ := domain.NewTask(taskAccessor)
+
+	var j TaskUpdateTitleJSON
+	if err := c.ShouldBindJSON(&j); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	taskID := uint(taskIDInt)
+
+	err = t.UpdateTitle(taskID, j.Title)
+	if err != nil {
+		if err.Error() == "record not found" {
+			c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
+		}
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
@@ -118,6 +159,7 @@ func TaskLanize(c *gin.Context) {
 	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
 	}
 
 	taskID := uint(taskIDInt)
@@ -126,6 +168,7 @@ func TaskLanize(c *gin.Context) {
 	if err != nil {
 		// In this case, possible error would be record not found.
 		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
