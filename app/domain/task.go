@@ -29,6 +29,7 @@ type TaskAccessor interface {
 	FindTreeByID(id uint) (*repository.TreeableTask, error)
 	Create(title string) (*repository.Task, error)
 	UpdateCompletedAt(id uint, completedAt time.Time) error
+	UpdateTitle(id uint, title string) error
 	UpdateType(id uint, taskType uint) error
 	DeleteAncestorTaskRelations(taskID uint) error
 	CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error
@@ -151,6 +152,16 @@ func (t *Task) Create(title string) (*Task, error) {
 // Complete makes a task done.
 func (t *Task) Complete(id uint) error {
 	err := t.taskAccessor.UpdateCompletedAt(id, time.Now())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateTitle changes a task title.
+func (t *Task) UpdateTitle(id uint, title string) error {
+	err := t.taskAccessor.UpdateTitle(id, title)
 	if err != nil {
 		return err
 	}

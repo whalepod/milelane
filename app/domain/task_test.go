@@ -214,6 +214,10 @@ func (*TaskAccessorMock) UpdateCompletedAt(id uint, completedAt time.Time) error
 	return nil
 }
 
+func (*TaskAccessorMock) UpdateTitle(id uint, title string) error {
+	return nil
+}
+
 func (*TaskAccessorMock) UpdateType(id uint, taskType uint) error {
 	return nil
 }
@@ -250,6 +254,10 @@ func (*TaskAccessorErrorMock) Create(title string) (*repository.Task, error) {
 }
 
 func (*TaskAccessorErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
+	return xerrors.New("error mock called")
+}
+
+func (*TaskAccessorErrorMock) UpdateTitle(id uint, title string) error {
 	return xerrors.New("error mock called")
 }
 
@@ -473,6 +481,10 @@ func (*TaskAccessorMoveToChildErrorMock) UpdateCompletedAt(id uint, completedAt 
 	return nil
 }
 
+func (*TaskAccessorMoveToChildErrorMock) UpdateTitle(id uint, title string) error {
+	return nil
+}
+
 func (*TaskAccessorMoveToChildErrorMock) UpdateType(id uint, taskType uint) error {
 	return nil
 }
@@ -513,6 +525,10 @@ func (*TaskAccessorCreateDeviceTaskErrorMock) Create(title string) (*repository.
 }
 
 func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
+	return nil
+}
+
+func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateTitle(id uint, title string) error {
 	return nil
 }
 
@@ -763,6 +779,36 @@ func TestCompleteError(t *testing.T) {
 	}
 
 	err = task.Complete(1)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
+	}
+
+	t.Log("Success: Got expected err.")
+}
+
+func TestUpdateTitle(t *testing.T) {
+	var taskAccessor TaskAccessorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.UpdateTitle(1, "Update test")
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateTitleError(t *testing.T) {
+	var taskAccessor TaskAccessorErrorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.UpdateTitle(1, "Update test")
 	if err.Error() != "error mock called" {
 		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
