@@ -79,6 +79,18 @@ func (t *TaskRepository) UpdateCompletedAt(id uint, completedAt time.Time) error
 	return nil
 }
 
+// UpdateTitle updates title in a task record.
+func (t *TaskRepository) UpdateTitle(id uint, title string) error {
+	var task Task
+	if err := t.DB.Find(&task, id).Error; err != nil {
+		return err
+	}
+
+	// This won't happen expected error.
+	t.DB.Model(&task).Update("title", title)
+	return nil
+}
+
 // UpdateType updates type in a task record.
 func (t *TaskRepository) UpdateType(id uint, taskType uint) error {
 	var task Task
