@@ -52,6 +52,12 @@ func TestRouter(t *testing.T) {
 		t.Fatal("Returned wrong http status.")
 	}
 
+	jsonStr = `{"title":"テストタイトル"}`
+	res = performRequest(router, "POST", "/tasks/1/update-title", &jsonStr)
+	if http.StatusOK != res.Code {
+		t.Fatal("Returned wrong http status.")
+	}
+
 	res = performRequest(router, "POST", "/tasks/1/lanize", nil)
 	if http.StatusOK != res.Code {
 		t.Fatal("Returned wrong http status.")
