@@ -34,6 +34,10 @@ func Router() *gin.Engine {
 		handler.TaskComplete(c)
 	})
 
+	r.POST("/tasks/:taskID/update-title", func(c *gin.Context) {
+		handler.TaskUpdateTitle(c)
+	})
+
 	r.POST("/tasks/:taskID/lanize", func(c *gin.Context) {
 		handler.TaskLanize(c)
 	})
