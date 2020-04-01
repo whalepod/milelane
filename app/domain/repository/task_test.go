@@ -202,7 +202,7 @@ func TestUpdateTitleSelectionCallsError(t *testing.T) {
 	err := taskRepository.UpdateTitle(1, "Update test")
 
 	if err.Error() != "task selection failed" {
-		t.Fatalf("Got %v\nwant %v", err, "record not found")
+		t.Fatalf("Got %v\nwant %v", err, "task selection failed")
 	}
 
 	t.Log("Success.")
@@ -227,7 +227,7 @@ func TestUpdateTitleUpdateCallsError(t *testing.T) {
 	err := taskRepository.UpdateTitle(1, "Update test")
 
 	if err.Error() != "updating task failed" {
-		t.Fatalf("Got %v\nwant %v", err, "record not found")
+		t.Fatalf("Got %v\nwant %v", err, "updating task failed")
 	}
 
 	t.Log("Success.")
@@ -271,7 +271,7 @@ func TestUpdateTypeSelectionCallsError(t *testing.T) {
 	err := taskRepository.UpdateType(1, 10)
 
 	if err.Error() != "task selection failed" {
-		t.Fatalf("Got %v\nwant %v", err, "record not found")
+		t.Fatalf("Got %v\nwant %v", err, "task selection failed")
 	}
 
 	t.Log("Success.")
@@ -296,7 +296,7 @@ func TestUpdateTypeUpdateCallsError(t *testing.T) {
 	err := taskRepository.UpdateType(1, 10)
 
 	if err.Error() != "updating task failed" {
-		t.Fatalf("Got %v\nwant %v", err, "record not found")
+		t.Fatalf("Got %v\nwant %v", err, "updating task failed")
 	}
 
 	t.Log("Success.")
