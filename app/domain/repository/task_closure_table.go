@@ -42,6 +42,8 @@ func (t *TaskRepository) ListTree() (*[]TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			max(descendant_relations.path_length) AS depth
@@ -53,6 +55,8 @@ func (t *TaskRepository) ListTree() (*[]TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			descendant_relations.descendant_id
@@ -88,6 +92,8 @@ func (t *TaskRepository) ListTreeByDeviceUUID(deviceUUID string) (*[]TreeableTas
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			max(descendant_relations.path_length) AS depth
@@ -101,6 +107,8 @@ func (t *TaskRepository) ListTreeByDeviceUUID(deviceUUID string) (*[]TreeableTas
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			descendant_relations.descendant_id
@@ -137,6 +145,7 @@ func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
 			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
@@ -161,6 +170,7 @@ func (t *TaskRepository) FindTreeByID(id uint) (*TreeableTask, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
 			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at
@@ -196,6 +206,7 @@ func (t *TaskRepository) appendChildren(tree TreeableTask, tasks []TaskWithDepth
 				Title:       task.Title,
 				Type:        task.Type,
 				CompletedAt: task.CompletedAt,
+				StartsAt:    task.StartsAt,
 				ExpiresAt:   task.ExpiresAt,
 				CreatedAt:   task.CreatedAt,
 				UpdatedAt:   task.UpdatedAt,
@@ -221,6 +232,8 @@ func (t *TaskRepository) ListSelfAndDescendants(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at
 		FROM tasks
@@ -232,6 +245,8 @@ func (t *TaskRepository) ListSelfAndDescendants(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
+			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,
 			descendant_relations.path_length
@@ -261,6 +276,7 @@ func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
 			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at
@@ -273,6 +289,7 @@ func (t *TaskRepository) ListSelfAndAncestors(taskID uint) (*[]Task, error) {
 			tasks.title,
 			tasks.type,
 			tasks.completed_at,
+			tasks.starts_at,
 			tasks.expires_at,
 			tasks.created_at,
 			tasks.updated_at,

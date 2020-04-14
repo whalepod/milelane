@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS `tasks` (
   `title` VARCHAR(255) NOT NULL,
   `type` INT UNSIGNED NOT NULL DEFAULT 0,
   `completed_at` DATETIME,
+  `starts_at` DATETIME,
+  `expires_at` DATETIME,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
