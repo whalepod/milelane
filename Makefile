@@ -1,7 +1,7 @@
 .PHONY: help
 
 .DEFAULT_GOAL := help
-_mysql=${USER_NAME}:${PASSWARD}@/${DATABASE}?parseTime=true
+_mysql=${MILELANE_DATABASE_USERNAME}:${MILELANE_DATABASE_PASSWORD}@/${MILELANE_DATABASE}?parseTime=true
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

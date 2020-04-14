@@ -13,13 +13,18 @@ func (t *Task) ListByDeviceUUID(deviceUUID string) (*[]Task, error) {
 			ID:        treeableTask.ID,
 			Title:     treeableTask.Title,
 			Type:      TaskType(treeableTask.Type).String(),
-			ExpiresAt: treeableTask.ExpiresAt.Format("2006-01-02 15:04:05"),
 			CreatedAt: treeableTask.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt: treeableTask.UpdatedAt.Format("2006-01-02 15:04:05"),
 			Depth:     treeableTask.Depth,
 		}
 		if treeableTask.CompletedAt != nil {
 			task.CompletedAt = treeableTask.CompletedAt.Format("2006-01-02 15:04:05")
+		}
+		if treeableTask.StartsAt != nil {
+			task.StartsAt = treeableTask.StartsAt.Format("2006-01-02 15:04:05")
+		}
+		if treeableTask.ExpiresAt != nil {
+			task.ExpiresAt = treeableTask.ExpiresAt.Format("2006-01-02 15:04:05")
 		}
 		task = task.mapChildren(treeableTask.Children)
 		tasks = append(tasks, task)
@@ -39,7 +44,6 @@ func (t *Task) CreateWithDevice(deviceUUID string, title string) (*Task, error) 
 		ID:        (*repositoryTask).ID,
 		Title:     (*repositoryTask).Title,
 		Type:      TaskType((*repositoryTask).Type).String(),
-		ExpiresAt: (*repositoryTask).ExpiresAt.Format("2006-01-02 15:04:05"),
 		CreatedAt: (*repositoryTask).CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt: (*repositoryTask).UpdatedAt.Format("2006-01-02 15:04:05"),
 		Depth:     1,
