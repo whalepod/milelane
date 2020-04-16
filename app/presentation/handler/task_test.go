@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	QueryTaskTreeSelect = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelect = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskInsert     = `INSERT INTO "tasks" ("title","type","completed_at","starts_at","expires_at","created_at","updated_at") VALUES (?,?,?,?,?,?,?)`
 )
 
 func TestTaskIndex(t *testing.T) {
@@ -185,7 +186,7 @@ func TestTaskCreateFailByInfrastructure(t *testing.T) {
 	db, mock, _ := getDBMock()
 	defer db.Close()
 
-	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "tasks" ("title","completed_at","expires_at","created_at","updated_at") VALUES (?,?,?,?,?)`)).
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskInsert)).
 		WillReturnError(fmt.Errorf("Task insertion failed"))
 
 	// Mock infrastructure.DB to test irregular error.

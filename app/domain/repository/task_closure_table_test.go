@@ -10,17 +10,20 @@ import (
 )
 
 const (
-	QueryTaskTreeSelect               = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
-	QueryTaskTreeSelectByDeviceUUID   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id LEFT JOIN device_tasks ON tasks.id = device_tasks.task_id WHERE device_tasks.device_uuid = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
-	QueryTaskTreeSelectByTaskID       = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE ( tasks.id IN ( SELECT tasks.id FROM tasks LEFT JOIN task_relations ON tasks.id = task_relations.descendant_id WHERE ( task_relations.ancestor_id = ? ) ) ) GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
-	QueryTaskSelectSelfAndDescendants = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE descendant_relations.ancestor_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, descendant_relations.path_length ORDER BY descendant_relations.path_length asc`
-	QueryTaskSelectSelfAndAncestors   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS ancestor_relations ON tasks.id = ancestor_relations.ancestor_id WHERE ancestor_relations.descendant_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.created_at, tasks.updated_at, ancestor_relations.path_length ORDER BY ancestor_relations.path_length asc`
+	QueryTaskTreeSelect               = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelectByDeviceUUID   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id LEFT JOIN device_tasks ON tasks.id = device_tasks.task_id WHERE device_tasks.device_uuid = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, descendant_relations.descendant_id ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskTreeSelectByTaskID       = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, max(descendant_relations.path_length) AS depth FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE ( tasks.id IN ( SELECT tasks.id FROM tasks LEFT JOIN task_relations ON tasks.id = task_relations.descendant_id WHERE ( task_relations.ancestor_id = ? ) ) ) GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at ORDER BY group_concat(descendant_relations.ancestor_id ORDER BY descendant_relations.path_length DESC), tasks.id`
+	QueryTaskSelectSelfAndDescendants = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS descendant_relations ON tasks.id = descendant_relations.descendant_id WHERE descendant_relations.ancestor_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, descendant_relations.path_length ORDER BY descendant_relations.path_length asc`
+	QueryTaskSelectSelfAndAncestors   = `SELECT tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at FROM tasks LEFT JOIN task_relations AS ancestor_relations ON tasks.id = ancestor_relations.ancestor_id WHERE ancestor_relations.descendant_id = ? GROUP BY tasks.id, tasks.title, tasks.type, tasks.completed_at, tasks.starts_at, tasks.expires_at, tasks.created_at, tasks.updated_at, ancestor_relations.path_length ORDER BY ancestor_relations.path_length asc`
 	QueryTaskSelectPathLength         = `SELECT max(path_length) AS path_length FROM task_relations WHERE descendant_id = ?`
 	QueryTaskRelationDeleteAncestors  = `DELETE FROM task_relations WHERE descendant_id IN (?,?,?) AND ancestor_id NOT IN (?,?,?)`
 	QueryTaskSelectID2                = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 2)`
 	QueryTaskSelectID3                = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 3)`
 	QueryTaskRelationInsertRegex      = `INSERT INTO task_relations`
 )
+
+var TaskResultRowFormat = []string{"id", "title", "type", "completed_at", "starts_at", "expires_at", "created_at", "updated_at"}
+var TaskResultRowFormatWithDepth = []string{"id", "title", "type", "completed_at", "starts_at", "expires_at", "created_at", "updated_at", "depth"}
 
 func TestListTree(t *testing.T) {
 	expectedTreeableTasks := []TreeableTask{
@@ -29,6 +32,8 @@ func TestListTree(t *testing.T) {
 				ID:          1,
 				Title:       "trunk",
 				CompletedAt: &now,
+				StartsAt:    &now,
+				ExpiresAt:   &now,
 				CreatedAt:   now,
 				UpdatedAt:   now,
 			},
@@ -39,6 +44,8 @@ func TestListTree(t *testing.T) {
 						ID:          2,
 						Title:       "branch",
 						CompletedAt: &now,
+						StartsAt:    &now,
+						ExpiresAt:   &now,
 						CreatedAt:   now,
 						UpdatedAt:   now,
 					},
@@ -49,6 +56,8 @@ func TestListTree(t *testing.T) {
 								ID:          3,
 								Title:       "leaf",
 								CompletedAt: &now,
+								StartsAt:    &now,
+								ExpiresAt:   &now,
 								CreatedAt:   now,
 								UpdatedAt:   now,
 							},
@@ -59,6 +68,8 @@ func TestListTree(t *testing.T) {
 								ID:          5,
 								Title:       "leaf-2",
 								CompletedAt: &now,
+								StartsAt:    &now,
+								ExpiresAt:   &now,
 								CreatedAt:   now,
 								UpdatedAt:   now,
 							},
@@ -71,6 +82,8 @@ func TestListTree(t *testing.T) {
 						ID:          4,
 						Title:       "branch-2",
 						CompletedAt: &now,
+						StartsAt:    &now,
+						ExpiresAt:   &now,
 						CreatedAt:   now,
 						UpdatedAt:   now,
 					},
@@ -85,12 +98,12 @@ func TestListTree(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelect)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}).
-				AddRow("1", "trunk", now, now, now, 1).
-				AddRow("2", "branch", now, now, now, 2).
-				AddRow("3", "leaf", now, now, now, 3).
-				AddRow("5", "leaf-2", now, now, now, 3).
-				AddRow("4", "branch-2", now, now, now, 2))
+			sqlmock.NewRows(TaskResultRowFormatWithDepth).
+				AddRow("1", "trunk", 0, now, now, now, now, now, 1).
+				AddRow("2", "branch", 0, now, now, now, now, now, 2).
+				AddRow("3", "leaf", 0, now, now, now, now, now, 3).
+				AddRow("5", "leaf-2", 0, now, now, now, now, now, 3).
+				AddRow("4", "branch-2", 0, now, now, now, now, now, 2))
 
 	taskRepository := NewTask(db)
 	tasks, err := taskRepository.ListTree()
@@ -132,6 +145,8 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 				ID:          1,
 				Title:       "trunk",
 				CompletedAt: &now,
+				StartsAt:    &now,
+				ExpiresAt:   &now,
 				CreatedAt:   now,
 				UpdatedAt:   now,
 			},
@@ -142,6 +157,8 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 						ID:          2,
 						Title:       "branch",
 						CompletedAt: &now,
+						StartsAt:    &now,
+						ExpiresAt:   &now,
 						CreatedAt:   now,
 						UpdatedAt:   now,
 					},
@@ -152,6 +169,8 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 								ID:          3,
 								Title:       "leaf",
 								CompletedAt: &now,
+								StartsAt:    &now,
+								ExpiresAt:   &now,
 								CreatedAt:   now,
 								UpdatedAt:   now,
 							},
@@ -162,6 +181,8 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 								ID:          5,
 								Title:       "leaf-2",
 								CompletedAt: &now,
+								StartsAt:    &now,
+								ExpiresAt:   &now,
 								CreatedAt:   now,
 								UpdatedAt:   now,
 							},
@@ -174,6 +195,8 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 						ID:          4,
 						Title:       "branch-2",
 						CompletedAt: &now,
+						StartsAt:    &now,
+						ExpiresAt:   &now,
 						CreatedAt:   now,
 						UpdatedAt:   now,
 					},
@@ -188,12 +211,12 @@ func TestListTreeByDeviceUUID(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByDeviceUUID)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}).
-				AddRow("1", "trunk", now, now, now, 1).
-				AddRow("2", "branch", now, now, now, 2).
-				AddRow("3", "leaf", now, now, now, 3).
-				AddRow("5", "leaf-2", now, now, now, 3).
-				AddRow("4", "branch-2", now, now, now, 2))
+			sqlmock.NewRows(TaskResultRowFormatWithDepth).
+				AddRow("1", "trunk", 0, now, now, now, now, now, 1).
+				AddRow("2", "branch", 0, now, now, now, now, now, 2).
+				AddRow("3", "leaf", 0, now, now, now, now, now, 3).
+				AddRow("5", "leaf-2", 0, now, now, now, now, now, 3).
+				AddRow("4", "branch-2", 0, now, now, now, now, now, 2))
 
 	taskRepository := NewTask(db)
 	deviceUUID := "60982a48-9328-441f-805b-d3ab0cad9e1f"
@@ -236,6 +259,8 @@ func TestFindTreeByID(t *testing.T) {
 			ID:          2,
 			Title:       "branch",
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
@@ -246,6 +271,8 @@ func TestFindTreeByID(t *testing.T) {
 					ID:          3,
 					Title:       "leaf",
 					CompletedAt: &now,
+					StartsAt:    &now,
+					ExpiresAt:   &now,
 					CreatedAt:   now,
 					UpdatedAt:   now,
 				},
@@ -256,6 +283,8 @@ func TestFindTreeByID(t *testing.T) {
 					ID:          5,
 					Title:       "leaf-2",
 					CompletedAt: &now,
+					StartsAt:    &now,
+					ExpiresAt:   &now,
 					CreatedAt:   now,
 					UpdatedAt:   now,
 				},
@@ -269,10 +298,10 @@ func TestFindTreeByID(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByTaskID)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}).
-				AddRow("2", "branch", now, now, now, 2).
-				AddRow("3", "leaf", now, now, now, 3).
-				AddRow("5", "leaf-2", now, now, now, 3))
+			sqlmock.NewRows(TaskResultRowFormatWithDepth).
+				AddRow("2", "branch", 0, now, now, now, now, now, 2).
+				AddRow("3", "leaf", 0, now, now, now, now, now, 3).
+				AddRow("5", "leaf-2", 0, now, now, now, now, now, 3))
 
 	taskRepository := NewTask(db)
 	var id uint = 2
@@ -311,7 +340,7 @@ func TestFindTreeByIDErrorRecordNotFound(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskTreeSelectByTaskID)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at", "depth"}))
+			sqlmock.NewRows(TaskResultRowFormatWithDepth))
 
 	var id uint = 9999
 	taskRepository := NewTask(db)
@@ -328,21 +357,30 @@ func TestListSelfAndDescendants(t *testing.T) {
 		{
 			ID:          1,
 			Title:       "trunk",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
 		{
 			ID:          2,
 			Title:       "branch",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
 		{
 			ID:          3,
 			Title:       "leaf",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
@@ -353,10 +391,10 @@ func TestListSelfAndDescendants(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("1", "trunk", now, now, now).
-				AddRow("2", "branch", now, now, now).
-				AddRow("3", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("1", "trunk", 0, now, now, now, now, now).
+				AddRow("2", "branch", 0, now, now, now, now, now).
+				AddRow("3", "leaf", 0, now, now, now, now, now))
 
 	taskRepository := NewTask(db)
 	tasks, err := taskRepository.ListSelfAndDescendants(3)
@@ -381,7 +419,7 @@ func TestListSelfAndDescendantsRecordNotFound(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}))
+			sqlmock.NewRows(TaskResultRowFormat))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.ListSelfAndDescendants(3)
@@ -413,21 +451,30 @@ func TestListSelfAndAncestors(t *testing.T) {
 		{
 			ID:          3,
 			Title:       "leaf",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
 		{
 			ID:          2,
 			Title:       "branch",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
 		{
 			ID:          1,
 			Title:       "trunk",
+			Type:        0,
 			CompletedAt: &now,
+			StartsAt:    &now,
+			ExpiresAt:   &now,
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		},
@@ -438,10 +485,10 @@ func TestListSelfAndAncestors(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "leaf", now, now, now).
-				AddRow("2", "branch", now, now, now).
-				AddRow("1", "trunk", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "leaf", 0, now, now, now, now, now).
+				AddRow("2", "branch", 0, now, now, now, now, now).
+				AddRow("1", "trunk", 0, now, now, now, now, now))
 
 	taskRepository := NewTask(db)
 	tasks, err := taskRepository.ListSelfAndAncestors(3)
@@ -466,7 +513,7 @@ func TestListSelfAndAncestorsRecordNotFound(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}))
+			sqlmock.NewRows(TaskResultRowFormat))
 
 	taskRepository := NewTask(db)
 	_, err := taskRepository.ListSelfAndAncestors(3)
@@ -537,10 +584,10 @@ func TestDeleteAncestorTaskRelations(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("1", "trunk", now, now, now).
-				AddRow("2", "branch", now, now, now).
-				AddRow("3", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("1", "trunk", 0, now, now, now, now, now).
+				AddRow("2", "branch", 0, now, now, now, now, now).
+				AddRow("3", "leaf", 0, now, now, now, now, now))
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskRelationDeleteAncestors)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
@@ -575,10 +622,10 @@ func TestDeleteAncestorTaskRelationsFailOnDeletion(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("1", "trunk", now, now, now).
-				AddRow("2", "branch", now, now, now).
-				AddRow("3", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("1", "trunk", 0, now, now, now, now, now).
+				AddRow("2", "branch", 0, now, now, now, now, now).
+				AddRow("3", "leaf", 0, now, now, now, now, now))
 
 	mock.ExpectExec(regexp.QuoteMeta(QueryTaskRelationDeleteAncestors)).
 		WillReturnError(fmt.Errorf("Task deletion failed"))
@@ -598,13 +645,13 @@ func TestCreateTaskRelationsBetweenTasks(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -613,15 +660,15 @@ func TestCreateTaskRelationsBetweenTasks(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "trunk", now, now, now).
-				AddRow("1", "root", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "trunk", 0, now, now, now, now, now).
+				AddRow("1", "root", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "branch", now, now, now).
-				AddRow("4", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "branch", 0, now, now, now, now, now).
+				AddRow("4", "leaf", 0, now, now, now, now, now))
 
 	// First ancestor loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
@@ -694,8 +741,8 @@ func TestCreateTaskRelationsBetweenTasksFailOnFindChild(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnError(fmt.Errorf("Task selection failed"))
@@ -715,13 +762,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetParentLevel(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnError(fmt.Errorf("level acquisition failed"))
@@ -741,13 +788,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetAncestorList(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -772,13 +819,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantList(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -787,9 +834,9 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantList(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "trunk", now, now, now).
-				AddRow("1", "root", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "trunk", 0, now, now, now, now, now).
+				AddRow("1", "root", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnError(fmt.Errorf("Task selection failed"))
@@ -809,13 +856,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetAncestorLevel(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -824,15 +871,15 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetAncestorLevel(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "trunk", now, now, now).
-				AddRow("1", "root", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "trunk", 0, now, now, now, now, now).
+				AddRow("1", "root", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "branch", now, now, now).
-				AddRow("4", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "branch", 0, now, now, now, now, now).
+				AddRow("4", "leaf", 0, now, now, now, now, now))
 
 	// First ancestor loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
@@ -853,13 +900,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantLevel(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -868,15 +915,15 @@ func TestCreateTaskRelationsBetweenTasksFailOnGetDescendantLevel(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "trunk", now, now, now).
-				AddRow("1", "root", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "trunk", 0, now, now, now, now, now).
+				AddRow("1", "root", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "branch", now, now, now).
-				AddRow("4", "leaf", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "branch", 0, now, now, now, now, now).
+				AddRow("4", "leaf", 0, now, now, now, now, now))
 
 	// First ancestor loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
@@ -903,13 +950,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnInsertion(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID2)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectID3)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "テストタスク", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "テストタスク", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).
 		WillReturnRows(
@@ -918,13 +965,13 @@ func TestCreateTaskRelationsBetweenTasksFailOnInsertion(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndAncestors)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("2", "trunk", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("2", "trunk", 0, now, now, now, now, now))
 
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectSelfAndDescendants)).
 		WillReturnRows(
-			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
-				AddRow("3", "branch", now, now, now))
+			sqlmock.NewRows(TaskResultRowFormat).
+				AddRow("3", "branch", 0, now, now, now, now, now))
 
 	// First ancestor loop.
 	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelectPathLength)).

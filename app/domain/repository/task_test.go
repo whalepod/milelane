@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	QueryTaskInsert            = `INSERT INTO "tasks" ("title","type","completed_at", "expires_at","created_at","updated_at") VALUES (?,?,?,?,?,?)`
+	QueryTaskInsert            = `INSERT INTO "tasks" ("title","type","completed_at","starts_at","expires_at","created_at","updated_at") VALUES (?,?,?,?,?,?,?)`
 	QueryTaskRelationInsert    = `INSERT INTO "task_relations" ("ancestor_id","descendant_id","path_length","created_at","updated_at") VALUES (?,?,?,?,?)`
 	QueryTaskSelect            = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 1)`
 	QueryTaskUpdateCompletedAt = `UPDATE "tasks" SET "completed_at" = ?`
