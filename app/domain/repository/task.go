@@ -81,6 +81,38 @@ func (t *TaskRepository) UpdateCompletedAt(id uint, completedAt time.Time) error
 	return nil
 }
 
+// UpdateStartsAt updates starts_at in a task record.
+func (t *TaskRepository) UpdateStartsAt(id uint, startsAt *time.Time) error {
+	var task Task
+	if err := t.DB.Find(&task, id).Error; err != nil {
+		return err
+	}
+
+	if startsAt == nil {
+		t.DB.Model(&task).Update("StartsAt", gorm.Expr("NULL"))
+	} else {
+		t.DB.Model(&task).Update("StartsAt", *startsAt)
+	}
+
+	return nil
+}
+
+// UpdateExpiresAt updates expires_at in a task record.
+func (t *TaskRepository) UpdateExpiresAt(id uint, expiresAt *time.Time) error {
+	var task Task
+	if err := t.DB.Find(&task, id).Error; err != nil {
+		return err
+	}
+
+	if expiresAt == nil {
+		t.DB.Model(&task).Update("ExpiresAt", gorm.Expr("NULL"))
+	} else {
+		t.DB.Model(&task).Update("ExpiresAt", *expiresAt)
+	}
+
+	return nil
+}
+
 // UpdateTitle updates title in a task record.
 func (t *TaskRepository) UpdateTitle(id uint, title string) error {
 	var task Task
