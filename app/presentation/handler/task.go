@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -20,6 +21,12 @@ type TaskCreateJSON struct {
 // TaskUpdateTitleJSON is struct for binding update request params.
 type TaskUpdateTitleJSON struct {
 	Title string `json:"title" binding:"required,min=1,max=255"`
+}
+
+// TaskUpdateTermJSON is struct for binding update request params.
+type TaskUpdateTermJSON struct {
+	StartsAt  *time.Time `json:"starts_at" time_format:"2006-01-02T15:04:05Z"`
+	ExpiresAt *time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z"`
 }
 
 // TaskIndex returns all tasks.
@@ -113,6 +120,38 @@ func TaskComplete(c *gin.Context) {
 	if err != nil {
 		// In this case, possible error would be record not found.
 		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// TaskUpdateTerm changes a task title.
+func TaskUpdateTerm(c *gin.Context) {
+	taskAccessor := repository.NewTask(infrastructure.DB)
+	t, _ := domain.NewTask(taskAccessor)
+
+	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	var j TaskUpdateTermJSON
+	// Allow request with empty body, to cleanup task term.
+	// But if any wrong formatted request detected, this returns 422.
+	if err := c.ShouldBindJSON(&j); err != nil && err.Error() != "invalid request" {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	err = t.UpdateTerm(uint(taskIDInt), j.StartsAt, j.ExpiresAt)
+	if err != nil {
+		if err.Error() == "record not found" {
+			c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
+		}
 		return
 	}
 
