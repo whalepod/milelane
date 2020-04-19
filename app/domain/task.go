@@ -20,15 +20,14 @@ const (
 // Implementation(s) of TaskAccessor is/are
 // - TaskRepository.
 // - TaskAccessorMock (in test).
-// - TaskAccessorErrorMock (in test).
-// - TaskAccessorMoveToChildErrorMock (in test).
-// - TaskAccessorCreateDeviceTaskErrorMock (in test).
 type TaskAccessor interface {
 	ListTree() (*[]repository.TreeableTask, error)
 	ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error)
 	FindTreeByID(id uint) (*repository.TreeableTask, error)
 	Create(title string) (*repository.Task, error)
 	UpdateCompletedAt(id uint, completedAt time.Time) error
+	UpdateStartsAt(id uint, startsAt *time.Time) error
+	UpdateExpiresAt(id uint, expiresAt *time.Time) error
 	UpdateTitle(id uint, title string) error
 	UpdateType(id uint, taskType uint) error
 	DeleteAncestorTaskRelations(taskID uint) error
@@ -172,6 +171,21 @@ func (t *Task) Create(title string) (*Task, error) {
 // Complete makes a task done.
 func (t *Task) Complete(id uint) error {
 	err := t.taskAccessor.UpdateCompletedAt(id, time.Now())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateTerm sets a task activation term.
+func (t *Task) UpdateTerm(id uint, startsAt *time.Time, expiresAt *time.Time) error {
+	err := t.taskAccessor.UpdateStartsAt(id, startsAt)
+	if err != nil {
+		return err
+	}
+
+	err = t.taskAccessor.UpdateExpiresAt(id, expiresAt)
 	if err != nil {
 		return err
 	}

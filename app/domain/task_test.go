@@ -10,9 +10,15 @@ import (
 	"github.com/whalepod/milelane/app/domain/repository"
 )
 
-type TaskAccessorMock struct{}
+type TaskAccessorMock struct {
+	ErrorTarget string
+}
 
-func (*TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {
+func (mock *TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {
+	if mock.ErrorTarget == "ListTree" {
+		return nil, xerrors.New("error mock called")
+	}
+
 	tasks := []repository.TreeableTask{
 		{
 			Task: repository.Task{
@@ -87,7 +93,11 @@ func (*TaskAccessorMock) ListTree() (*[]repository.TreeableTask, error) {
 	return &tasks, nil
 }
 
-func (*TaskAccessorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
+func (mock *TaskAccessorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
+	if mock.ErrorTarget == "ListTreeByDeviceUUID" {
+		return nil, xerrors.New("error mock called")
+	}
+
 	tasks := []repository.TreeableTask{
 		{
 			Task: repository.Task{
@@ -162,7 +172,11 @@ func (*TaskAccessorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.
 	return &tasks, nil
 }
 
-func (*TaskAccessorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
+func (mock *TaskAccessorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
+	if mock.ErrorTarget == "FindTreeByID" {
+		return nil, xerrors.New("error mock called")
+	}
+
 	task := repository.TreeableTask{
 		Task: repository.Task{
 			ID:          1,
@@ -235,377 +249,78 @@ func (*TaskAccessorMock) FindTreeByID(id uint) (*repository.TreeableTask, error)
 	return &task, nil
 }
 
-func (*TaskAccessorMock) Create(title string) (*repository.Task, error) {
+func (mock *TaskAccessorMock) Create(title string) (*repository.Task, error) {
+	if mock.ErrorTarget == "Create" {
+		return nil, xerrors.New("error mock called")
+	}
+
 	var task repository.Task
 	return &task, nil
 }
 
-func (*TaskAccessorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
+func (mock *TaskAccessorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
+	if mock.ErrorTarget == "UpdateCompletedAt" {
+		return xerrors.New("error mock called")
+	}
+
 	return nil
 }
 
-func (*TaskAccessorMock) UpdateTitle(id uint, title string) error {
+func (mock *TaskAccessorMock) UpdateStartsAt(id uint, startsAt *time.Time) error {
+	if mock.ErrorTarget == "UpdateStartsAt" {
+		return xerrors.New("error mock called")
+	}
+
 	return nil
 }
 
-func (*TaskAccessorMock) UpdateType(id uint, taskType uint) error {
+func (mock *TaskAccessorMock) UpdateExpiresAt(id uint, expiresAt *time.Time) error {
+	if mock.ErrorTarget == "UpdateExpiresAt" {
+		return xerrors.New("error mock called")
+	}
+
 	return nil
 }
 
-func (*TaskAccessorMock) DeleteAncestorTaskRelations(taskID uint) error {
+func (mock *TaskAccessorMock) UpdateTitle(id uint, title string) error {
+	if mock.ErrorTarget == "UpdateTitle" {
+		return xerrors.New("error mock called")
+	}
+
 	return nil
 }
 
-func (*TaskAccessorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
+func (mock *TaskAccessorMock) UpdateType(id uint, taskType uint) error {
+	if mock.ErrorTarget == "UpdateType" {
+		return xerrors.New("error mock called")
+	}
+
 	return nil
 }
 
-func (*TaskAccessorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+func (mock *TaskAccessorMock) DeleteAncestorTaskRelations(taskID uint) error {
+	if mock.ErrorTarget == "DeleteAncestorTaskRelations" {
+		return xerrors.New("error mock called")
+	}
+
+	return nil
+}
+
+func (mock *TaskAccessorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
+	if mock.ErrorTarget == "CreateTaskRelationsBetweenTasks" {
+		return xerrors.New("error mock called")
+	}
+
+	return nil
+}
+
+func (mock *TaskAccessorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
+	if mock.ErrorTarget == "CreateDeviceTask" {
+		return nil, xerrors.New("error mock called")
+	}
+
 	var deviceTask repository.DeviceTask
 	return &deviceTask, nil
-}
-
-type TaskAccessorErrorMock struct{}
-
-func (*TaskAccessorErrorMock) ListTree() (*[]repository.TreeableTask, error) {
-	return nil, xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
-	return nil, xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
-	return nil, xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) Create(title string) (*repository.Task, error) {
-	return nil, xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) UpdateTitle(id uint, title string) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) UpdateType(id uint, taskType uint) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
-	return nil, xerrors.New("error mock called")
-}
-
-type TaskAccessorMoveToChildErrorMock struct{}
-
-func (*TaskAccessorMoveToChildErrorMock) ListTree() (*[]repository.TreeableTask, error) {
-	tasks := []repository.TreeableTask{
-		{
-			Task: repository.Task{
-				ID:          1,
-				Title:       "trunk",
-				Type:        uint(TypeLane),
-				CompletedAt: &now,
-				StartsAt:    &now,
-				ExpiresAt:   &now,
-				CreatedAt:   now,
-				UpdatedAt:   now,
-			},
-			Depth: 1,
-			Children: []repository.TreeableTask{
-				{
-					Task: repository.Task{
-						ID:          2,
-						Title:       "branch",
-						Type:        uint(TypeTask),
-						CompletedAt: &now,
-						StartsAt:    &now,
-						ExpiresAt:   &now,
-						CreatedAt:   now,
-						UpdatedAt:   now,
-					},
-					Depth: 2,
-					Children: []repository.TreeableTask{
-						{
-							Task: repository.Task{
-								ID:          3,
-								Title:       "leaf",
-								Type:        uint(TypeTask),
-								CompletedAt: &now,
-								StartsAt:    &now,
-								ExpiresAt:   &now,
-								CreatedAt:   now,
-								UpdatedAt:   now,
-							},
-							Depth: 3,
-						},
-						{
-							Task: repository.Task{
-								ID:          5,
-								Title:       "leaf-2",
-								Type:        uint(TypeTask),
-								CompletedAt: &now,
-								StartsAt:    &now,
-								ExpiresAt:   &now,
-								CreatedAt:   now,
-								UpdatedAt:   now,
-							},
-							Depth: 3,
-						},
-					},
-				},
-				{
-					Task: repository.Task{
-						ID:          4,
-						Title:       "branch-2",
-						Type:        uint(TypeTask),
-						CompletedAt: &now,
-						StartsAt:    &now,
-						ExpiresAt:   &now,
-						CreatedAt:   now,
-						UpdatedAt:   now,
-					},
-					Depth: 2,
-				},
-			},
-		},
-	}
-	return &tasks, nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
-	tasks := []repository.TreeableTask{
-		{
-			Task: repository.Task{
-				ID:          1,
-				Title:       "trunk",
-				Type:        uint(TypeLane),
-				CompletedAt: &now,
-				StartsAt:    &now,
-				ExpiresAt:   &now,
-				CreatedAt:   now,
-				UpdatedAt:   now,
-			},
-			Depth: 1,
-			Children: []repository.TreeableTask{
-				{
-					Task: repository.Task{
-						ID:          2,
-						Title:       "branch",
-						Type:        uint(TypeTask),
-						CompletedAt: &now,
-						StartsAt:    &now,
-						ExpiresAt:   &now,
-						CreatedAt:   now,
-						UpdatedAt:   now,
-					},
-					Depth: 2,
-					Children: []repository.TreeableTask{
-						{
-							Task: repository.Task{
-								ID:          3,
-								Title:       "leaf",
-								Type:        uint(TypeTask),
-								CompletedAt: &now,
-								StartsAt:    &now,
-								ExpiresAt:   &now,
-								CreatedAt:   now,
-								UpdatedAt:   now,
-							},
-							Depth: 3,
-						},
-						{
-							Task: repository.Task{
-								ID:          5,
-								Title:       "leaf-2",
-								Type:        uint(TypeTask),
-								CompletedAt: &now,
-								StartsAt:    &now,
-								ExpiresAt:   &now,
-								CreatedAt:   now,
-								UpdatedAt:   now,
-							},
-							Depth: 3,
-						},
-					},
-				},
-				{
-					Task: repository.Task{
-						ID:          4,
-						Title:       "branch-2",
-						Type:        uint(TypeTask),
-						CompletedAt: &now,
-						StartsAt:    &now,
-						ExpiresAt:   &now,
-						CreatedAt:   now,
-						UpdatedAt:   now,
-					},
-					Depth: 2,
-				},
-			},
-		},
-	}
-	return &tasks, nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
-	task := repository.TreeableTask{
-		Task: repository.Task{
-			ID:          1,
-			Title:       "trunk",
-			Type:        uint(TypeLane),
-			CompletedAt: &now,
-			StartsAt:    &now,
-			ExpiresAt:   &now,
-			CreatedAt:   now,
-			UpdatedAt:   now,
-		},
-		Depth: 1,
-		Children: []repository.TreeableTask{
-			{
-				Task: repository.Task{
-					ID:          2,
-					Title:       "branch",
-					Type:        uint(TypeTask),
-					CompletedAt: &now,
-					StartsAt:    &now,
-					ExpiresAt:   &now,
-					CreatedAt:   now,
-					UpdatedAt:   now,
-				},
-				Depth: 2,
-				Children: []repository.TreeableTask{
-					{
-						Task: repository.Task{
-							ID:          3,
-							Title:       "leaf",
-							Type:        uint(TypeTask),
-							CompletedAt: &now,
-							StartsAt:    &now,
-							ExpiresAt:   &now,
-							CreatedAt:   now,
-							UpdatedAt:   now,
-						},
-						Depth: 3,
-					},
-					{
-						Task: repository.Task{
-							ID:          5,
-							Title:       "leaf-2",
-							Type:        uint(TypeTask),
-							CompletedAt: &now,
-							StartsAt:    &now,
-							ExpiresAt:   &now,
-							CreatedAt:   now,
-							UpdatedAt:   now,
-						},
-						Depth: 3,
-					},
-				},
-			},
-			{
-				Task: repository.Task{
-					ID:          4,
-					Title:       "branch-2",
-					Type:        uint(TypeTask),
-					CompletedAt: &now,
-					StartsAt:    &now,
-					ExpiresAt:   &now,
-					CreatedAt:   now,
-					UpdatedAt:   now,
-				},
-				Depth: 2,
-			},
-		},
-	}
-	return &task, nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) Create(title string) (*repository.Task, error) {
-	var task repository.Task
-	return &task, nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
-	return nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) UpdateTitle(id uint, title string) error {
-	return nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) UpdateType(id uint, taskType uint) error {
-	return nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
-	return nil
-}
-
-func (*TaskAccessorMoveToChildErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
-	return xerrors.New("error mock called")
-}
-
-func (*TaskAccessorMoveToChildErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
-	var deviceTask repository.DeviceTask
-	return &deviceTask, nil
-}
-
-type TaskAccessorCreateDeviceTaskErrorMock struct{}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) ListTree() (*[]repository.TreeableTask, error) {
-	tasks := []repository.TreeableTask{}
-	return &tasks, nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) ListTreeByDeviceUUID(deviceUUID string) (*[]repository.TreeableTask, error) {
-	tasks := []repository.TreeableTask{}
-	return &tasks, nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) FindTreeByID(id uint) (*repository.TreeableTask, error) {
-	task := repository.TreeableTask{}
-	return &task, nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) Create(title string) (*repository.Task, error) {
-	var task repository.Task
-	return &task, nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateCompletedAt(id uint, completedAt time.Time) error {
-	return nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateTitle(id uint, title string) error {
-	return nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) UpdateType(id uint, taskType uint) error {
-	return nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) DeleteAncestorTaskRelations(taskID uint) error {
-	return nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) CreateTaskRelationsBetweenTasks(parentTaskID uint, childTaskID uint) error {
-	return nil
-}
-
-func (*TaskAccessorCreateDeviceTaskErrorMock) CreateDeviceTask(deviceUUID string, taskID uint) (*repository.DeviceTask, error) {
-	return nil, xerrors.New("error mock called")
 }
 
 func TestList(t *testing.T) {
@@ -692,7 +407,7 @@ func TestList(t *testing.T) {
 }
 
 func TestListError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "ListTree"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -789,7 +504,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestFindError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "FindTreeByID"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -821,7 +536,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestCreateError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "Create"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -852,13 +567,58 @@ func TestComplete(t *testing.T) {
 }
 
 func TestCompleteError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateCompletedAt"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
 	}
 
 	err = task.Complete(1)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
+	}
+
+	t.Log("Success: Got expected err.")
+}
+
+func TestUpdateTerm(t *testing.T) {
+	var taskAccessor TaskAccessorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.UpdateTerm(1, &now, &now)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateTermErrorOnUpdateStartsAt(t *testing.T) {
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateStartsAt"}
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.UpdateTerm(1, &now, &now)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
+	}
+
+	t.Log("Success: Got expected err.")
+}
+
+func TestUpdateTermErrorOnUpdateExpiresAt(t *testing.T) {
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateExpiresAt"}
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.UpdateTerm(1, &now, &now)
 	if err.Error() != "error mock called" {
 		t.Fatalf("Got %v\nwant %v", err, "error mock called")
 	}
@@ -882,7 +642,7 @@ func TestUpdateTitle(t *testing.T) {
 }
 
 func TestUpdateTitleError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateTitle"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -912,7 +672,7 @@ func TestLanize(t *testing.T) {
 }
 
 func TestLanizeError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateType"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -942,7 +702,7 @@ func TestMoveToRoot(t *testing.T) {
 }
 
 func TestMoveToRootError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "DeleteAncestorTaskRelations"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -972,7 +732,7 @@ func TestMoveToChild(t *testing.T) {
 }
 
 func TestMoveToChildErrorOnDeleteAncestorTaskRelations(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "DeleteAncestorTaskRelations"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -987,7 +747,7 @@ func TestMoveToChildErrorOnDeleteAncestorTaskRelations(t *testing.T) {
 }
 
 func TestMoveToChildErrorOnCreateTaskRelationsBetweenTasks(t *testing.T) {
-	var taskAccessor TaskAccessorMoveToChildErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "CreateTaskRelationsBetweenTasks"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
