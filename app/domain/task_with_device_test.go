@@ -90,7 +90,7 @@ func TestListByDeviceUUID(t *testing.T) {
 }
 
 func TestListByDeviceUUIDError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "ListTreeByDeviceUUID"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -123,7 +123,7 @@ func TestCreateWithDevice(t *testing.T) {
 }
 
 func TestCreateDeviceTaskError(t *testing.T) {
-	var taskAccessor TaskAccessorErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "Create"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
@@ -140,7 +140,7 @@ func TestCreateDeviceTaskError(t *testing.T) {
 }
 
 func TestCreateDeviceTaskErrorOnCreateDeviceTask(t *testing.T) {
-	var taskAccessor TaskAccessorCreateDeviceTaskErrorMock
+	taskAccessor := TaskAccessorMock{ErrorTarget: "CreateDeviceTask"}
 	task, err := NewTask(&taskAccessor)
 	if err != nil {
 		t.Fatalf("Returned err response: %s", err.Error())
