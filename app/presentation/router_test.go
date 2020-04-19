@@ -52,6 +52,12 @@ func TestRouter(t *testing.T) {
 		t.Fatal("Returned wrong http status.")
 	}
 
+	jsonStr = `{"starts_at":"2020-01-01T00:00:00Z","expires_at":"2020-12-31T23:59:59Z"}`
+	res = performRequest(router, "POST", "/tasks/1/update-term", &jsonStr)
+	if http.StatusOK != res.Code {
+		t.Fatal("Returned wrong http status.")
+	}
+
 	jsonStr = `{"title":"テストタイトル"}`
 	res = performRequest(router, "POST", "/tasks/1/update-title", &jsonStr)
 	if http.StatusOK != res.Code {
