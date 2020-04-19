@@ -13,6 +13,8 @@ const (
 	QueryTaskRelationInsert    = `INSERT INTO "task_relations" ("ancestor_id","descendant_id","path_length","created_at","updated_at") VALUES (?,?,?,?,?)`
 	QueryTaskSelect            = `SELECT * FROM "tasks" WHERE ("tasks"."id" = 1)`
 	QueryTaskUpdateCompletedAt = `UPDATE "tasks" SET "completed_at" = ?`
+	QueryTaskUpdateStartsAt    = `UPDATE "tasks" SET "starts_at" = ?`
+	QueryTaskUpdateExpiresAt   = `UPDATE "tasks" SET "expires_at" = ?`
 	QueryTaskUpdateTitle       = `UPDATE "tasks" SET "title" = ?`
 	QueryTaskUpdateType        = `UPDATE "tasks" SET "type" = ?`
 )
@@ -138,6 +140,144 @@ func TestUpdateCompletedAtWithNotFoundID(t *testing.T) {
 	taskRepository := NewTask(db)
 
 	err := taskRepository.UpdateCompletedAt(1, now)
+
+	if err.Error() != "record not found" {
+		t.Fatalf("Got %v\nwant %v", err, "record not found")
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateStartsAt(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateStartsAt)).
+		WithArgs(now, AnyTime{}, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateStartsAt(1, &now)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateStartsAtByNull(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateStartsAt)).
+		WithArgs(now, nil, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateStartsAt(1, nil)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateStartsAtWithNotFoundID(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}))
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateStartsAt(1, &now)
+
+	if err.Error() != "record not found" {
+		t.Fatalf("Got %v\nwant %v", err, "record not found")
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateExpiresAt(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateExpiresAt)).
+		WithArgs(now, AnyTime{}, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateExpiresAt(1, &now)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateExpiresAtByNull(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}).
+				AddRow("1", "テストタスク", nil, now, now))
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(QueryTaskUpdateExpiresAt)).
+		WithArgs(now, nil, 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateExpiresAt(1, nil)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestUpdateExpiresAtWithNotFoundID(t *testing.T) {
+	db, mock, _ := getDBMock()
+	defer db.Close()
+
+	mock.ExpectQuery(regexp.QuoteMeta(QueryTaskSelect)).
+		WillReturnRows(
+			sqlmock.NewRows([]string{"id", "title", "completed_at", "created_at", "updated_at"}))
+
+	taskRepository := NewTask(db)
+
+	err := taskRepository.UpdateExpiresAt(1, &now)
 
 	if err.Error() != "record not found" {
 		t.Fatalf("Got %v\nwant %v", err, "record not found")
