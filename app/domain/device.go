@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/whalepod/milelane/app/domain/repository"
+import (
+	"time"
+
+	"github.com/whalepod/milelane/app/domain/repository"
+)
 
 // DeviceType contains application platform.
 type DeviceType uint
@@ -54,8 +58,8 @@ func (d *Device) Create(deviceToken string, deviceType string) (*Device, error) 
 		UUID:        (*repositoryDevice).UUID,
 		DeviceToken: (*repositoryDevice).DeviceToken,
 		Type:        DeviceType((*repositoryDevice).Type).String(),
-		CreatedAt:   (*repositoryDevice).CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:   (*repositoryDevice).UpdatedAt.Format("2006-01-02 15:04:05"),
+		CreatedAt:   (*repositoryDevice).CreatedAt.In(time.Local).Format("2006-01-02 15:04:05"),
+		UpdatedAt:   (*repositoryDevice).UpdatedAt.In(time.Local).Format("2006-01-02 15:04:05"),
 	}
 
 	return &device, nil
