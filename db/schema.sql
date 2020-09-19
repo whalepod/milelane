@@ -1,5 +1,3 @@
-USE `milelane`;
-
 CREATE TABLE IF NOT EXISTS `devices` (
   `uuid` VARCHAR(36) NOT NULL PRIMARY KEY,
   `device_token` VARCHAR(255) NOT NULL,
