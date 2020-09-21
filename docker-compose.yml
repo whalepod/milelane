@@ -6,24 +6,35 @@ volumes:
 
 services:
     milelane:
-        build: .
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
         hostname: docker-local.milelane.co
         ports:
           - 80:80
         environment:
             - MILELANE_DATABASE_USERNAME=root
             - MILELANE_DATABASE_PASSWORD=
-            - MILELANE_DATABASE_HOST=milelane_mysql_1
+            - MILELANE_DATABASE_HOST=mysql
             - MILELANE_DATABASE=milelane
             - PORT=80
         depends_on:
             - mysql
+        entrypoint:
+            - dockerize
+            - -timeout
+            - 60s
+            - -wait
+            - tcp://mysql:3306
+        command: ./main
     mysql:
         image: mysql:5.6
         ports:
             - 3306:3306
         environment:
             - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            - MYSQL_DATABASE=milelane
+            - MYSQL_USER=root
         volumes:
             - mysql-data:/var/lib/mysql
             - ./db:/docker-entrypoint-initdb.d
