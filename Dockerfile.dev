@@ -1,0 +1,19 @@
+FROM golang:1.13.5-alpine as build
+
+WORKDIR /go/milelane
+
+COPY . .
+
+RUN GOOS=linux GOARCH=amd64 go build main.go
+
+FROM alpine
+
+WORKDIR /milelane
+
+COPY --from=build /go/milelane .
+
+ENV DOCKERIZE_VERSION v0.6.0
+RUN apk add --no-cache openssl \
+    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
