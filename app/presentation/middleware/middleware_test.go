@@ -23,6 +23,9 @@ func TestCORSHeaders(t *testing.T) {
 	}{
 		// This is default localhost domain for electron.
 		{"ws://127.0.0.1:5858", http.StatusOK},
+		{"https://app.milelane.co", http.StatusOK},
+		// Unpermitted Origin
+		{"localhost:5858", http.StatusForbidden},
 	}
 
 	for i, test := range tests {
