@@ -11,6 +11,13 @@ import (
 // This prohibit unauthorized access.
 // TODO: disable access from unpermitted ip/hosts.
 func CORSHeaders() gin.HandlerFunc {
+	allowOrigins := []string{
+		"http://app.milelane.co",
+		"https://app.milelane.co",
+		"http://localhost:8080",
+		"ws://127.0.0.1:5858",
+	}
+
 	return cors.New(cors.Config{
 		AllowMethods: []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders: []string{
@@ -22,9 +29,13 @@ func CORSHeaders() gin.HandlerFunc {
 			"X-Device-UUID",
 			"Authorization",
 		},
-		// Allow every request until which request should be allowed is decided.
 		AllowOriginFunc: func(origin string) bool {
-			return true
+			for _, o := range allowOrigins {
+				if origin == o {
+					return true
+				}
+			}
+			return false
 		},
 		MaxAge: 24 * time.Hour,
 	})
