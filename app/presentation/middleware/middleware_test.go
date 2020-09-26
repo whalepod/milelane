@@ -30,9 +30,7 @@ func TestCORSHeaders(t *testing.T) {
 
 	for i, test := range tests {
 		client := &http.Client{}
-
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s/", ts.URL), nil)
-
 		if err != nil {
 			t.Fatal(err)
 		}
