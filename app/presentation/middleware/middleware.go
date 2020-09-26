@@ -11,7 +11,7 @@ import (
 // This prohibit unauthorized access.
 // TODO: disable access from unpermitted ip/hosts.
 func CORSHeaders() gin.HandlerFunc {
-	allowOrigins := []string{
+	allowedOrigins := []string{
 		"http://app.milelane.co",
 		"https://app.milelane.co",
 		"http://localhost:8080",
@@ -30,7 +30,7 @@ func CORSHeaders() gin.HandlerFunc {
 			"Authorization",
 		},
 		AllowOriginFunc: func(origin string) bool {
-			for _, o := range allowOrigins {
+			for _, o := range allowedOrigins {
 				if origin == o {
 					return true
 				}
