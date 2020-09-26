@@ -25,12 +25,14 @@ func TestCORSHeaders(t *testing.T) {
 		{"ws://127.0.0.1:5858", http.StatusOK},
 		{"https://app.milelane.co", http.StatusOK},
 		// Unpermitted Origin
-		{"localhost:5858", http.StatusForbidden},
+		{"http://localhost:5858", http.StatusForbidden},
 	}
 
 	for i, test := range tests {
 		client := &http.Client{}
+
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s/", ts.URL), nil)
+
 		if err != nil {
 			t.Fatal(err)
 		}
