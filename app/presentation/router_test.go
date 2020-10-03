@@ -69,6 +69,11 @@ func TestRouter(t *testing.T) {
 		t.Fatal("Returned wrong http status.")
 	}
 
+	res = performRequest(router, "POST", "/tasks/1/delanize", nil)
+	if http.StatusOK != res.Code {
+		t.Fatal("Returned wrong http status.")
+	}
+
 	res = performRequest(router, "POST", "/tasks/1/move-to-root", nil)
 	if http.StatusOK != res.Code {
 		t.Fatal("Returned wrong http status.")

@@ -46,6 +46,10 @@ func Router() *gin.Engine {
 		handler.TaskLanize(c)
 	})
 
+	r.POST("/tasks/:taskID/delanize", func(c *gin.Context) {
+		handler.TaskDelanize(c)
+	})
+
 	r.POST("/tasks/:taskID/move-to-root", func(c *gin.Context) {
 		handler.TaskMoveToRoot(c)
 	})

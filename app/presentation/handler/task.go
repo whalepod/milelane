@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -204,6 +205,30 @@ func TaskLanize(c *gin.Context) {
 	taskID := uint(taskIDInt)
 
 	err = t.Lanize(taskID)
+	if err != nil {
+		// In this case, possible error would be record not found.
+		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// TaskLanize makes a task lanized.
+func TaskDelanize(c *gin.Context) {
+	taskAccessor := repository.NewTask(infrastructure.DB)
+	t, _ := domain.NewTask(taskAccessor)
+
+	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+	fmt.Println(taskIDInt)
+
+	taskID := uint(taskIDInt)
+
+	err = t.Delanize(taskID)
 	if err != nil {
 		// In this case, possible error would be record not found.
 		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
