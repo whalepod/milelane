@@ -213,7 +213,7 @@ func (t *Task) Lanize(id uint) error {
 	return nil
 }
 
-// Lanize makes a task TypeLane.
+// Delanize makes a task TypeTask.
 func (t *Task) Delanize(id uint) error {
 	err := t.taskAccessor.UpdateType(id, uint(TypeTask))
 	if err != nil {
