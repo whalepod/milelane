@@ -689,6 +689,62 @@ func TestTaskLanizeWithInvalidPath(t *testing.T) {
 	t.Log("Success.")
 }
 
+func TestTaskDelanize(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/delanize", func(c *gin.Context) {
+		TaskDelanize(c)
+	})
+
+	// With valid taskID, it returns StatusOK.
+	req, _ := http.NewRequest("POST", "/tasks/1/delanize", nil)
+	r.ServeHTTP(res, req)
+
+	if http.StatusOK != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskDelanizeWithNotFoundID(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/delanize", func(c *gin.Context) {
+		TaskDelanize(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	req, _ := http.NewRequest("POST", "/tasks/9999/delanize", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusNotFound != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
+func TestTaskDelanizeWithInvalidPath(t *testing.T) {
+	res := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(res)
+	r.POST("/tasks/:taskID/delanize", func(c *gin.Context) {
+		TaskDelanize(c)
+	})
+
+	// With wrong taskID, it returns StatusNotFound.
+	req, _ := http.NewRequest("POST", "/tasks/wrong_path/delanize", nil)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(res, req)
+
+	if http.StatusBadRequest != res.Code {
+		t.Fatalf("Returned wrong http status. Status: %v, Message: %v", res.Code, res.Body)
+	}
+
+	t.Log("Success.")
+}
+
 func TestTaskMoveToRoot(t *testing.T) {
 	res := httptest.NewRecorder()
 	_, r := gin.CreateTestContext(res)
