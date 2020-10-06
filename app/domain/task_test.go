@@ -686,6 +686,36 @@ func TestLanizeError(t *testing.T) {
 	t.Log("Success: Got expected err.")
 }
 
+func TestDelanize(t *testing.T) {
+	var taskAccessor TaskAccessorMock
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.Delanize(1)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	t.Log("Success.")
+}
+
+func TestDelanizeError(t *testing.T) {
+	taskAccessor := TaskAccessorMock{ErrorTarget: "UpdateType"}
+	task, err := NewTask(&taskAccessor)
+	if err != nil {
+		t.Fatalf("Returned err response: %s", err.Error())
+	}
+
+	err = task.Delanize(1)
+	if err.Error() != "error mock called" {
+		t.Fatalf("Got %v\nwant %v", err, "error mock called")
+	}
+
+	t.Log("Success: Got expected err.")
+}
+
 func TestMoveToRoot(t *testing.T) {
 	var taskAccessor TaskAccessorMock
 	task, err := NewTask(&taskAccessor)

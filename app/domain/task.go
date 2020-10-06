@@ -213,6 +213,16 @@ func (t *Task) Lanize(id uint) error {
 	return nil
 }
 
+// Delanize makes a task TypeTask.
+func (t *Task) Delanize(id uint) error {
+	err := t.taskAccessor.UpdateType(id, uint(TypeTask))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // MoveToRoot moves a task to root directory.
 func (t *Task) MoveToRoot(taskID uint) error {
 	err := t.taskAccessor.DeleteAncestorTaskRelations(taskID)

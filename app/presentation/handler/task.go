@@ -213,6 +213,29 @@ func TaskLanize(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
+// TaskDelanize makes a task delanized.
+func TaskDelanize(c *gin.Context) {
+	taskAccessor := repository.NewTask(infrastructure.DB)
+	t, _ := domain.NewTask(taskAccessor)
+
+	taskIDInt, err := strconv.Atoi(c.Param("taskID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	taskID := uint(taskIDInt)
+
+	err = t.Delanize(taskID)
+	if err != nil {
+		// In this case, possible error would be record not found.
+		c.JSON(http.StatusNotFound, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
 // TaskMoveToRoot moves a task to root directory.
 func TaskMoveToRoot(c *gin.Context) {
 	taskAccessor := repository.NewTask(infrastructure.DB)
