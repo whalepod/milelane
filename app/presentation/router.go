@@ -58,6 +58,10 @@ func Router() *gin.Engine {
 		handler.TaskMoveToChild(c)
 	})
 
+	r.GET("/task-share/:taskID", func(c *gin.Context) {
+		handler.TaskShareShow(c)
+	})
+
 	// `/` endpoint is used to healthcheck.
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
