@@ -28,10 +28,15 @@ func NewTaskShare(ts TaskShareAccessor) (*TaskShare, error) {
 // Find returns task and its descendants.
 func (t *TaskShare) Find(id uint) (*TaskShare, error) {
 	var taskShare TaskShare
-	result, err := t.taskShareAccessor.FindByID(id)
+	repoTaskShare, err := t.taskShareAccessor.FindByID(id)
 	if err != nil {
 		return &taskShare, err
 	}
+	taskShare = TaskShare{
+		Token:          repoTaskShare.Token,
+		TaskID:         repoTaskShare.TaskID,
+		PermissionType: repoTaskShare.PermissionType,
+	}
 
-	return &result, nil
+	return &taskShare, nil
 }

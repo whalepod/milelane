@@ -37,5 +37,6 @@ services:
             - MYSQL_USER=root
         volumes:
             - mysql-data:/var/lib/mysql
-            - ./db:/docker-entrypoint-initdb.d
+            - ./db:/docker-entrypoint-initdb.d/create_db.sql
+            - ./db:/docker-entrypoint-initdb.d/schema.sql
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci

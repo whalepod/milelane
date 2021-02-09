@@ -1,3 +1,5 @@
+USE `milelane`;
+
 CREATE TABLE IF NOT EXISTS `devices` (
   `uuid` VARCHAR(36) NOT NULL PRIMARY KEY,
   `device_token` VARCHAR(255) NOT NULL,
@@ -43,3 +45,9 @@ CREATE TABLE IF NOT EXISTS `device_tasks` (
 
 ALTER TABLE `device_tasks` ADD INDEX `idx_device_task_device_uuid`(`device_uuid`);
 ALTER TABLE `device_tasks` ADD INDEX `idx_device_task_task_id`(`task_id`);
+
+CREATE TABLE `task_share_tokens` (
+  `token`         VARCHAR(36)  NOT NULL PRIMARY KEY,
+  `task_id`         INT UNSIGNED NOT NULL,
+  `permission_type`    VARCHAR(36) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

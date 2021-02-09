@@ -64,3 +64,6 @@ INSERT INTO `device_tasks` (`device_uuid`, `task_id`, `created_at`, `updated_at`
 INSERT INTO `device_tasks` (`device_uuid`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 10, NOW(), NOW());
 INSERT INTO `device_tasks` (`device_uuid`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 11, NOW(), NOW());
 INSERT INTO `device_tasks` (`device_uuid`, `task_id`, `created_at`, `updated_at`) VALUES ('60982a48-9328-441f-805b-d3ab0cad9e1f', 12, NOW(), NOW());
+
+-- connect tasks with device.
+INSERT INTO `task_share_tokens` (`token`, `task_id`, `permission_type`) VALUES ('abcdefghijklmn', 1, `read`);
