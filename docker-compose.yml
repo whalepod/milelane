@@ -37,5 +37,10 @@ services:
             - MYSQL_USER=root
         volumes:
             - mysql-data:/var/lib/mysql
-            - ./db:/docker-entrypoint-initdb.d
+            # データベースの文字コードをutf8mb4に統一するために指定する
+            - ./db/config/my.cnf:/etc/mysql/conf.d/my.cnf
+            # initdb.d の実行順はアルファベット順
+            # https://tech.mokelab.com/infra/docker/images/mysql/initdb.html
+            - ./db/create_db.sql:/docker-entrypoint-initdb.d/000_create_db.sql
+            - ./db/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci

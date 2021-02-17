@@ -25,66 +25,7 @@ func performRequest(r http.Handler, method, path string, jsonStr *string) *httpt
 
 func TestRouter(t *testing.T) {
 	router := Router()
-	res := performRequest(router, "GET", "/tasks", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	jsonStr := `{"device_token":"dc625158-a9e9-4b7c-b15a-89991b013147","device_type":"0"}`
-	res = performRequest(router, "POST", "/device/create", &jsonStr)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	jsonStr = `{"title":"テストタイトル"}`
-	res = performRequest(router, "POST", "/tasks", &jsonStr)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "GET", "/tasks/1", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "POST", "/tasks/1/complete", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	jsonStr = `{"starts_at":"2020-01-01T00:00:00Z","expires_at":"2020-12-31T23:59:59Z"}`
-	res = performRequest(router, "POST", "/tasks/1/update-term", &jsonStr)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	jsonStr = `{"title":"テストタイトル"}`
-	res = performRequest(router, "POST", "/tasks/1/update-title", &jsonStr)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "POST", "/tasks/1/lanize", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "POST", "/tasks/1/delanize", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "POST", "/tasks/1/move-to-root", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "POST", "/tasks/1/move-to-child/2", nil)
-	if http.StatusOK != res.Code {
-		t.Fatal("Returned wrong http status.")
-	}
-
-	res = performRequest(router, "GET", "/", nil)
+	res := performRequest(router, "GET", "/", nil)
 	if http.StatusOK != res.Code {
 		t.Fatal("Returned wrong http status.")
 	}

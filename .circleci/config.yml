@@ -14,7 +14,7 @@ jobs:
         environment: # environment variables for primary container
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_ROOT_PASSWORD: ''
-          MYSQL_DATABASE: circle_test
+          MYSQL_DATABASE: milelane
           MYSQL_USER: root
     working_directory: /go/src/github.com/whalepod/milelane
     steps:
@@ -27,8 +27,8 @@ jobs:
           command: |
             sudo apt update
             sudo apt-get install default-mysql-client
-            mysql -h 127.0.0.1 -u root circle_test < db/schema.sql
-            mysql -h 127.0.0.1 -u root circle_test < db/seed/seed.sql
+            mysql -h 127.0.0.1 -u root < db/schema.sql
+            mysql -h 127.0.0.1 -u root < db/seed/seed.sql
       - run:
           name: "Create a tmp directory for artifacts which is used for codecov."
           command: |
