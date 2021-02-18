@@ -52,10 +52,3 @@ You need to set environment variable.
 #### dev
 export USER_NAME=root
 export DATABASE=milelane
-
-### Command
-#### Create migration file
-- `make migrate-create NAME=xxx_yyy_zzz`
-
-#### Apply migration
-- `migrate-up`

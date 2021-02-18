@@ -20,9 +20,3 @@ fmt: ## Run gofmt
 
 test: ## Run test
 	go test -race -v -coverprofile=cover.out ./... && go tool cover -html=cover.out -o cover.html
-
-migrate-create: ## create miration file ex) make migrate-create NAME=xxx_yyy_zzz
-	goose -dir "db/migration" mysql ${_mysql} create ${NAME} sql
-
-migrate-up: ## apply migraion
-	goose -dir "db/migration" mysql ${_mysql} up
