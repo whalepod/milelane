@@ -4,13 +4,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	// To enable gorm to connect MySQL.
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 // DB exposes database connection.
-var DB *gorm.DB
+var DB *sqlx.DB
 
 const maxSleepTime = 10
 
@@ -25,7 +24,7 @@ func init() {
 	DB = connectDB()
 }
 
-func connectDB() *gorm.DB {
+func connectDB() *sqlx.DB {
 	// Initalize db connection.
 	m := mySQLConfig{
 		Username: os.Getenv("MILELANE_DATABASE_USERNAME"),
@@ -35,10 +34,10 @@ func connectDB() *gorm.DB {
 	}
 
 	dbConfigStr := m.Username + ":" + m.Password + "@tcp(" + m.Host + ":3306)/" + m.Database + "?parseTime=true"
-	db, err := gorm.Open("mysql", dbConfigStr)
+	db, err := sqlx.Open("mysql", dbConfigStr)
 
 	for i := 0; i < maxSleepTime; i++ {
-		db, err := gorm.Open("mysql", dbConfigStr)
+		db, err := sqlx.Open("mysql", dbConfigStr)
 		if err == nil {
 			DB = db
 			break
