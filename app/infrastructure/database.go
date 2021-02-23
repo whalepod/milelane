@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	// To enable sqlx to connect MySQL.
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
