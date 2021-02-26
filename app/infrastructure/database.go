@@ -35,17 +35,31 @@ func connectDB() *sqlx.DB {
 	}
 
 	dbConfigStr := m.Username + ":" + m.Password + "@tcp(" + m.Host + ":3306)/" + m.Database + "?parseTime=true"
-	db, err := sqlx.Open("mysql", dbConfigStr)
 
-	for i := 0; i < maxSleepTime; i++ {
-		db, err := sqlx.Open("mysql", dbConfigStr)
-		if err == nil {
-			DB = db
-			break
+	// error in sqlx.Open() does not show whether db has connection or not.
+	// That's why it checks connection after Open connection.
+	db, err := sqlx.Open("mysql", dbConfigStr)
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.Ping()
+
+	if err != nil {
+		for i := 0; i < maxSleepTime; i++ {
+			db, err = sqlx.Open("mysql", dbConfigStr)
+			if err != nil {
+				panic(err.Error())
+			}
+			err = db.Ping()
+			if err == nil {
+				DB = db
+				break
+			}
+			time.Sleep(1 * time.Second)
 		}
-		time.Sleep(1 * time.Second)
 	}
 
+	err = db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
