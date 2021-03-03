@@ -1,36 +1,18 @@
 package repo
 
 import (
-	"time"
-
 	"github.com/jmoiron/sqlx"
 )
 
-type NoteAccessor interface {
-	Create(title string, body string) error
-}
-
 type NoteRepository struct {
-	DB           *sqlx.DB
-	noteAccessor NoteAccessor
+	DB *sqlx.DB
 }
 
-type Note struct {
-	ID        uint      `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func NewNote(db *sqlx.DB) NoteRepository {
+func NewNote(db *sqlx.DB) *NoteRepository {
 	var n NoteRepository
-	var na NoteAccessor
-
 	n.DB = db
-	n.noteAccessor = na
 
-	return n
+	return &n
 }
 
 func (t *NoteRepository) Create(title string, body string) error {
