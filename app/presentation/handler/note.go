@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/whalepod/milelane/app/infra"
 	"github.com/whalepod/milelane/app/infra/repo"
 )
 
@@ -33,14 +34,17 @@ func NewNote(na repo.NoteAccessor) *Note {
 }
 
 // NoteCreate save a note.
-func (t *Note) NoteCreate(c *gin.Context) {
+func NoteCreate(c *gin.Context) {
+	noteRepo := repo.NewNote(infra.DB)
+	na := NewNote(noteRepo)
+
 	var n NoteCreateJSON
 	if err := c.ShouldBindJSON(&n); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"status": "failed", "message": err.Error()})
 		return
 	}
 
-	err := t.noteAccessor.Create(n.Title, n.Body)
+	err := na.noteAccessor.Create(n.Title, n.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
 		return

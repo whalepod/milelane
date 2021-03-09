@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/whalepod/milelane/app/infra"
-	"github.com/whalepod/milelane/app/infra/repo"
 	"github.com/whalepod/milelane/app/presentation/handler"
 	"github.com/whalepod/milelane/app/presentation/middleware"
 )
@@ -20,10 +18,8 @@ func Router() *gin.Engine {
 		c.String(http.StatusOK, "ok")
 	})
 
-	noteRepository := repo.NewNote(infra.DB)
-	noteHandler := handler.NewNote(noteRepository)
 	r.POST("/notes", func(c *gin.Context) {
-		noteHandler.NoteCreate(c)
+		handler.NoteCreate(c)
 	})
 
 	return r
