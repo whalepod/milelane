@@ -47,14 +47,6 @@ func TestNotes_NoteCreate(t *testing.T) {
 			wantCode: http.StatusOK,
 			wantBody: nil,
 		},
-		{
-			name:     "body required",
-			title:    "",
-			body:     "",
-			mockErr:  nil,
-			wantCode: http.StatusInternalServerError,
-			wantBody: nil,
-		},
 	}
 
 	for _, tt := range tests {
@@ -69,9 +61,8 @@ func TestNotes_NoteCreate(t *testing.T) {
 			// Create Receive
 			res := httptest.NewRecorder()
 			_, r := gin.CreateTestContext(res)
-			h := NewNote(mock)
 			r.POST("/notes", func(c *gin.Context) {
-				h.NoteCreate(c)
+				NoteCreate(c)
 			})
 
 			// Create Request

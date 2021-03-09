@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"log"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -18,25 +20,27 @@ func NewNote(db *sqlx.DB) *NoteRepository {
 }
 
 // Create saves note record into DB.
-func (t *NoteRepository) Create(title string, body string) error {
+func (nr *NoteRepository) Create(title string, body string) error {
 	query := `
 		INSERT INTO notes (
 			title,
-			body
+			body,
+			created_at,
+			updated_at
 		) VALUES (
-			:title,
-			:body
+			?,
+			?,
+			now(),
+			now()
 		);
-		`
+	`
 
-	_, err := t.DB.NamedExec(
-		query,
-		map[string]interface{}{
-			"title": title,
-			"body":  body,
-		},
-	)
+	insert, err := nr.DB.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	insert.Exec(title, body)
 	if err != nil {
 		return err
 	}
