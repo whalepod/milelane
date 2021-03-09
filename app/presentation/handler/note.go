@@ -14,6 +14,7 @@ type NoteCreateJSON struct {
 	Body  string `json:"body" binding:"required,min=1"`
 }
 
+// Note is struct for repo.
 type Note struct {
 	noteAccessor repo.NoteAccessor
 	ID           uint      `json:"id"`
@@ -23,9 +24,10 @@ type Note struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-func NewNote(no repo.NoteAccessor) *Note {
+// NewNote returns Note struct with NoteAccessor.
+func NewNote(na repo.NoteAccessor) *Note {
 	var n Note
-	n.noteAccessor = no
+	n.noteAccessor = na
 
 	return &n
 }
