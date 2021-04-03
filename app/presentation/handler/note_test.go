@@ -1,4 +1,4 @@
-package handler
+package handler_test
 
 import (
 	"bytes"
@@ -9,43 +9,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/mock"
-	"github.com/whalepod/milelane/app/infra/repo"
+	"github.com/whalepod/milelane/app/presentation/handler"
 )
 
-type mockNoteAccesor struct {
-	mock.Mock
-	repo.NoteAccessor
-}
-
-func (m *mockNoteAccesor) NoteCreate(ctx *gin.Context) error {
-	return m.Called(ctx).Error(0)
-}
-
-func TestNotes_NoteCreate(t *testing.T) {
+func TestNoteCreate(t *testing.T) {
 	tests := []struct {
 		name     string
 		title    string
 		body     string
-		mockErr  error
 		wantCode int
-		wantBody error
 	}{
 		{
 			name:     "Success",
 			title:    "test title",
 			body:     "test body",
-			mockErr:  nil,
 			wantCode: http.StatusOK,
-			wantBody: nil,
 		},
 		{
 			name:     "Success(Empty title)",
 			title:    "",
 			body:     "test body",
-			mockErr:  nil,
 			wantCode: http.StatusOK,
-			wantBody: nil,
 		},
 	}
 
@@ -54,15 +38,11 @@ func TestNotes_NoteCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Create Mock
-			mock := &mockNoteAccesor{}
-			mock.On("Create").Return(tt.mockErr)
-
 			// Create Receive
-			res := httptest.NewRecorder()
-			_, r := gin.CreateTestContext(res)
+			rec := httptest.NewRecorder()
+			_, r := gin.CreateTestContext(rec)
 			r.POST("/notes", func(c *gin.Context) {
-				NoteCreate(c)
+				handler.NoteCreate(c)
 			})
 
 			// Create Request
@@ -71,13 +51,10 @@ func TestNotes_NoteCreate(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 
 			// Execute
-			r.ServeHTTP(res, req)
+			r.ServeHTTP(rec, req)
 
-			if diff := cmp.Diff(tt.wantBody, req.Body); diff != "" {
+			if diff := cmp.Diff(tt.wantCode, rec.Code); diff != "" {
 				t.Errorf("mismatch body (-want +got):\n%s", diff)
-			}
-			if diff := cmp.Diff(tt.wantCode, req.Response.StatusCode); diff != "" {
-				t.Errorf("mismatch code (-want +got):\n%s", diff)
 			}
 		})
 	}
