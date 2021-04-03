@@ -1,14 +1,13 @@
-package repo
+package repo_test
 
 import (
 	"testing"
 
 	"github.com/whalepod/milelane/app/infra"
+	"github.com/whalepod/milelane/app/infra/repo"
 )
 
-func TestNotes_Create(t *testing.T) {
-	noteRepository := NewNote(infra.DB)
-
+func TestNotesCreate(t *testing.T) {
 	tests := []struct {
 		name    string
 		title   string
@@ -23,6 +22,7 @@ func TestNotes_Create(t *testing.T) {
 		},
 	}
 
+	noteRepository := repo.NewNote(infra.DB)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := noteRepository.Create(tt.title, tt.body)
