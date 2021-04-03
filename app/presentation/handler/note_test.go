@@ -17,27 +17,35 @@ func TestNoteCreate(t *testing.T) {
 		name     string
 		title    string
 		body     string
+		DBError  bool
 		wantCode int
 	}{
 		{
 			name:     "Success",
 			title:    "test title",
 			body:     "test body",
+			DBError:  false,
 			wantCode: http.StatusOK,
 		},
 		{
 			name:     "Success(Empty title)",
 			title:    "",
 			body:     "test body",
+			DBError:  false,
 			wantCode: http.StatusOK,
+		},
+		{
+			name:     "Fail(binding error)",
+			title:    "",
+			body:     "",
+			DBError:  false,
+			wantCode: http.StatusUnprocessableEntity,
 		},
 	}
 
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			// Create Receive
 			rec := httptest.NewRecorder()
 			_, r := gin.CreateTestContext(rec)
