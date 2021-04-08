@@ -1,8 +1,6 @@
 package repo
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 )
 
@@ -28,19 +26,17 @@ func (nr *NoteRepository) Create(title string, body string) error {
 			created_at,
 			updated_at
 		) VALUES (
-			?,
-			?,
-			now(),
-			now()
+			:title,
+			:body,
+			NOW(),
+			NOW()
 		);
 	`
 
-	insert, err := nr.DB.Prepare(query)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	insert.Exec(title, body)
+	_, err := nr.DB.NamedExec(query, map[string]interface{}{
+		"title": title,
+		"body":  body,
+	})
 	if err != nil {
 		return err
 	}
