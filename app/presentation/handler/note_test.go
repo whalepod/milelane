@@ -10,7 +10,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-cmp/cmp"
+	"github.com/jmoiron/sqlx"
 	"github.com/whalepod/milelane/app/infra"
 	"github.com/whalepod/milelane/app/presentation/handler"
 )
@@ -49,16 +49,16 @@ func TestNoteCreate(t *testing.T) {
 			shouldInjectDBError: false,
 		},
 		{
-			name:                "Fail(DB error)",
-			title:               "",
-			body:                "",
+			name:                "Fail(Internal server error)",
+			title:               "test title",
+			body:                "test body",
 			DBError:             false,
-			wantCode:            http.StatusUnprocessableEntity,
+			wantCode:            http.StatusInternalServerError,
 			shouldInjectDBError: true,
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			originalDB := infra.DB
@@ -66,8 +66,10 @@ func TestNoteCreate(t *testing.T) {
 				db, mock, _ := sqlmock.New()
 				defer db.Close()
 
-				mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "notes" ("title", "body", "created_at", "updated_at") VALUES (?,?,NOW(),NOW());`)).
+				mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO notes ( title, body, created_at, updated_at ) VALUES ( ?,　?,　NOW(),　NOW() );`)).
 					WillReturnError(fmt.Errorf("DB error"))
+
+				infra.DB = sqlx.NewDb(db, "sqlmock")
 			}
 
 			// Create Receive
@@ -85,8 +87,8 @@ func TestNoteCreate(t *testing.T) {
 			// Execute
 			r.ServeHTTP(rec, req)
 
-			if diff := cmp.Diff(tt.wantCode, rec.Code); diff != "" {
-				t.Errorf("mismatch body (-want +got):\n%s", diff)
+			if rec.Code != tt.wantCode {
+				t.Errorf("#%d '%s' expected status code %d, got %d. Recorded body: %s", i, tt.name, tt.wantCode, rec.Code, rec.Body)
 			}
 
 			infra.DB = originalDB

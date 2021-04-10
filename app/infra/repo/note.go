@@ -20,17 +20,17 @@ func NewNote(db *sqlx.DB) *NoteRepository {
 // Create saves note record into DB.
 func (nr *NoteRepository) Create(title string, body string) error {
 	query := `
-		INSERT INTO notes (
-			title,
-			body,
-			created_at,
-			updated_at
-		) VALUES (
-			:title,
-			:body,
-			NOW(),
-			NOW()
-		);
+    INSERT INTO notes (
+      title,
+      body,
+      created_at,
+      updated_at
+    ) VALUES (
+      :title,
+      :body,
+      NOW(),
+      NOW()
+      );
 	`
 
 	_, err := nr.DB.NamedExec(query, map[string]interface{}{
