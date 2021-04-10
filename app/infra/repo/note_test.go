@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
 	"github.com/whalepod/milelane/app/infra"
 	"github.com/whalepod/milelane/app/infra/repo"
 )
@@ -40,9 +41,10 @@ func TestNotesCreate(t *testing.T) {
 			db, mock, _ := sqlmock.New()
 			defer db.Close()
 
-			mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "notes" ("title", "body", "created_at", "updated_at") VALUES (?,?,NOW(),NOW());`)).
-				WithArgs(tt.title, tt.body).
+			mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO notes ( title, body, created_at, updated_at ) VALUES ( ?,　?,　NOW(),　NOW() );`)).
 				WillReturnError(fmt.Errorf("DB error"))
+
+			infra.DB = sqlx.NewDb(db, "sqlmock")
 		}
 
 		noteRepository := repo.NewNote(infra.DB)
