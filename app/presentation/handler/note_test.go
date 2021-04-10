@@ -95,3 +95,61 @@ func TestNoteCreate(t *testing.T) {
 		})
 	}
 }
+
+func TestNoteList(t *testing.T) {
+	tests := []struct {
+		name                string
+		DBError             bool
+		wantCode            int
+		shouldInjectDBError bool
+	}{
+		{
+			name:                "Success",
+			DBError:             false,
+			wantCode:            http.StatusOK,
+			shouldInjectDBError: false,
+		},
+		{
+			name:                "Fail(Internal server error)",
+			DBError:             false,
+			wantCode:            http.StatusInternalServerError,
+			shouldInjectDBError: true,
+		},
+	}
+
+	for i, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			originalDB := infra.DB
+			if tt.shouldInjectDBError {
+				db, mock, _ := sqlmock.New()
+				defer db.Close()
+
+				mock.ExpectExec(regexp.QuoteMeta(`SELECT id, title, body FROM notes;`)).
+					WillReturnError(fmt.Errorf("DB error"))
+
+				infra.DB = sqlx.NewDb(db, "sqlmock")
+			}
+
+			// Create Receive
+			rec := httptest.NewRecorder()
+			_, r := gin.CreateTestContext(rec)
+			r.GET("/notes", func(c *gin.Context) {
+				handler.NoteList(c)
+			})
+
+			// Create Request
+			req := httptest.NewRequest(http.MethodGet, "/notes", nil)
+			req.Header.Set("Content-Type", "application/json")
+
+			// Execute
+			r.ServeHTTP(rec, req)
+
+			if rec.Code != tt.wantCode {
+				t.Errorf("#%d '%s' expected status code %d, got %d. Recorded body: %s", i, tt.name, tt.wantCode, rec.Code, rec.Body)
+			}
+
+			infra.DB = originalDB
+		})
+	}
+}
