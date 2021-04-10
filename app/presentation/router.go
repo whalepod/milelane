@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
+	"github.com/whalepod/milelane/app/presentation/handler"
 	"github.com/whalepod/milelane/app/presentation/middleware"
 )
 
@@ -16,6 +16,10 @@ func Router() *gin.Engine {
 	// `/` endpoint is used to healthcheck.
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
+	})
+
+	r.POST("/notes", func(c *gin.Context) {
+		handler.NoteCreate(c)
 	})
 
 	return r
