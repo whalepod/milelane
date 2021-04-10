@@ -52,3 +52,17 @@ func NoteCreate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, nil)
 }
+
+// NoteList list a note.
+func NoteList(c *gin.Context) {
+	noteRepo := repo.NewNote(infra.DB)
+	na := NewNote(noteRepo)
+
+	notes, err := na.noteAccessor.List()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "failed", "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, notes)
+}

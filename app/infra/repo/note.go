@@ -9,6 +9,12 @@ type NoteRepository struct {
 	DB *sqlx.DB
 }
 
+type NoteList struct {
+	ID    int
+	Title string
+	Body  string
+}
+
 // NewNote returns NoteRepository with DB connection.
 func NewNote(db *sqlx.DB) *NoteRepository {
 	var n NoteRepository
@@ -42,4 +48,24 @@ func (nr *NoteRepository) Create(title string, body string) error {
 	}
 
 	return nil
+}
+
+// List return note list record from DB.
+func (nr *NoteRepository) List() (*[]NoteList, error) {
+	query := `
+    SELECT
+      id,
+      title,
+      body
+    FROM
+      notes;
+	`
+
+	var notes []NoteList
+	err := nr.DB.Select(&notes, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return &notes, nil
 }

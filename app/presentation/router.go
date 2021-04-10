@@ -22,5 +22,9 @@ func Router() *gin.Engine {
 		handler.NoteCreate(c)
 	})
 
+	r.GET("/notes", func(c *gin.Context) {
+		handler.NoteList(c)
+	})
+
 	return r
 }
