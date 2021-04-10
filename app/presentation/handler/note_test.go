@@ -110,12 +110,6 @@ func TestNoteList(t *testing.T) {
 			shouldInjectDBError: false,
 		},
 		{
-			name:                "Success(Empty title)",
-			DBError:             false,
-			wantCode:            http.StatusOK,
-			shouldInjectDBError: false,
-		},
-		{
 			name:                "Fail(Internal server error)",
 			DBError:             false,
 			wantCode:            http.StatusInternalServerError,
